@@ -1,7 +1,9 @@
 @* ============================================================================
    Vista: Autores / Index
-   Muestra el listado de autores (modelo: IEnumerable<AutorIndexViewModel>)
-   con un cuadro de búsqueda por nombre y acciones de detalle/edición/borrado.
+   Listado de autores (IEnumerable<AutorIndexViewModel>) con búsqueda
+   INSTANTÁNEA por nombre mediante HTMX: al teclear, htmx solicita al
+   controlador la parcial _TablaAutores y sustituye solo la tabla.
+   El formulario clásico se conserva como fallback (requiere JS desactivado).
    ============================================================================ *@
 @model IEnumerable<AutorIndexViewModel>
 
@@ -25,10 +27,21 @@
 <div class="panel mb-4">
     <div class="panel-body">
         <form asp-action="Index" method="get" class="row g-2 align-items-end">
-            <div class="col-md-5">
+            <div class="col-md-6">
                 <label for="buscar" class="form-label">Buscar por nombre</label>
-                <input id="buscar" type="text" name="buscar" value="@ViewBag.Buscar"
-                       placeholder="Ej: Gabriel García Márquez..." class="form-control" />
+                <div class="position-relative">
+                    <input id="buscar" type="text" name="buscar" value="@ViewBag.Buscar"
+                           placeholder="Ej: Gabriel García Márquez..."
+                           class="form-control pe-5"
+                           hx-get="@Url.Action("Index")"
+                           hx-target="#autoresContainer"
+                           hx-swap="outerHTML"
+                           hx-trigger="input changed delay:400ms"
+                           hx-indicator="#buscando" />
+                    <span id="buscando" class="htmx-indicator position-absolute top-50 end-0 translate-middle-y me-3">
+                        <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+                    </span>
+                </div>
             </div>
             <div class="col-md-auto">
                 <button type="submit" class="btn btn-primary">Buscar</button>
@@ -38,48 +51,7 @@
     </div>
 </div>
 
-@if (!Model.Any())
-{
-    <div class="panel empty-state">
-        <div class="empty-icon">🔎</div>
-        <h3 class="h5 fw-600">No se encontraron autores</h3>
-        <p>Prueba con otro término de búsqueda.</p>
-    </div>
-}
-else
-{
-    <div class="panel">
-        <div class="table-responsive">
-            <table class="table table-modern table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Nacionalidad</th>
-                        <th>Fecha de Nacimiento</th>
-                        <th>Libros</th>
-                        <th class="text-end">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var autor in Model)
-                    {
-                        <tr>
-                            <td class="fw-semibold">@autor.Nombre</td>
-                            <td>@autor.Nacionalidad</td>
-                            <td>@(autor.FechaNacimiento?.ToString("dd/MM/yyyy") ?? "—")</td>
-                            <td><span class="badge badge-soft-primary">@autor.TotalLibros libro(s)</span></td>
-                            <td class="text-end text-nowrap">
-                                <a asp-action="Details" asp-route-id="@autor.Id" class="btn btn-sm btn-outline-primary" title="Ver detalles">Detalles</a>
-                                <a asp-action="Edit" asp-route-id="@autor.Id" class="btn btn-sm btn-warning" title="Editar">Editar</a>
-                                <a asp-action="Delete" asp-route-id="@autor.Id" class="btn btn-sm btn-danger" title="Eliminar">Eliminar</a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-}
+@await Html.PartialAsync("_TablaAutores", Model)
 
 <div class="mt-4">
     <a asp-controller="Home" asp-action="Index" class="btn btn-link">&larr; Volver al inicio</a>

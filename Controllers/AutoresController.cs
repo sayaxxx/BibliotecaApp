@@ -12,6 +12,7 @@
 //  Inyección de dependencias: el contenedor registra IAutorService -> AutorService
 //  en Program.cs, y el framework lo inyecta en este constructor.
 // ============================================================================
+using BibliotecaApp.Helpers;
 using BibliotecaApp.Services;
 using BibliotecaApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -33,6 +34,7 @@ namespace BibliotecaApp.Controllers
         /// <summary>
         /// GET: Autores/Index — Lista los autores aplicando un filtro opcional
         /// por nombre ('buscar') que viene del cuadro de búsqueda.
+        /// Si la petición es de HTMX devuelve solo la tabla (búsqueda instantánea).
         /// </summary>
         /// <param name="buscar">Texto que se busca dentro del nombre del autor.</param>
         public async Task<IActionResult> Index(string? buscar)
@@ -42,6 +44,13 @@ namespace BibliotecaApp.Controllers
 
             // Se reenvía el texto buscado a la vista para que el campo no se pierda.
             ViewBag.Buscar = buscar;
+
+            // Petición htmx => solo el fragmento de la tabla (sin recargar la página).
+            if (Request.IsHtmx())
+            {
+                return PartialView("_TablaAutores", autores);
+            }
+
             return View(autores);
         }
 

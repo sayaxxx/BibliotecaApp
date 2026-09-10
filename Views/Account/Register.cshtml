@@ -1,7 +1,7 @@
 @* ============================================================================
    Vista: Account / Register
-   Alta de nuevas cuentas. Los usuarios creados aquí reciben el rol "Lector"
-   (solo lectura del catálogo y consulta de "Mis Préstamos").
+   Alta de nuevas cuentas. Los usuarios creados aquí reciben el rol "Lector".
+   Con Alpine.js: botones de mostrar/ocultar contraseña y confirmación.
    ============================================================================ *@
 @model RegisterViewModel
 @{
@@ -11,7 +11,7 @@
 <div class="az-center-page">
     <div class="auth-card">
         <div class="auth-head">
-            <span class="auth-icon">📝</span>
+            <img src="~/media/logo-book.svg" alt="BibliotecaApp" style="width:60px;height:60px;border-radius:16px;" />
             <h1 class="h4 fw-700 mt-3 mb-0 text-white">Crear Cuenta</h1>
         </div>
         <div class="auth-body">
@@ -34,14 +34,28 @@
 
                 <div class="mb-3">
                     <label asp-for="Password" class="form-label"></label>
-                    <input asp-for="Password" class="form-control" placeholder="••••••••" autocomplete="new-password" />
+                    <div class="password-wrap" x-data="{ show: false }">
+                        <input asp-for="Password" class="form-control" placeholder="••••••••"
+                               autocomplete="new-password" :type="show ? 'text' : 'password'" />
+                        <button type="button" class="password-toggle" x-on:click="show = !show"
+                                :aria-label="show ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                            <span x-text="show ? '🙈' : '👁'"></span>
+                        </button>
+                    </div>
                     <span asp-validation-for="Password" class="text-danger"></span>
                     <div class="form-text">Mínimo 8 caracteres, con mayúscula, número y símbolo.</div>
                 </div>
 
                 <div class="mb-4">
                     <label asp-for="ConfirmPassword" class="form-label"></label>
-                    <input asp-for="ConfirmPassword" class="form-control" placeholder="••••••••" autocomplete="new-password" />
+                    <div class="password-wrap" x-data="{ show: false }">
+                        <input asp-for="ConfirmPassword" class="form-control" placeholder="••••••••"
+                               autocomplete="new-password" :type="show ? 'text' : 'password'" />
+                        <button type="button" class="password-toggle" x-on:click="show = !show"
+                                :aria-label="show ? 'Ocultar contraseña' : 'Mostrar contraseña'">
+                            <span x-text="show ? '🙈' : '👁'"></span>
+                        </button>
+                    </div>
                     <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 </div>
 

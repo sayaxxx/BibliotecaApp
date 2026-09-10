@@ -14,11 +14,13 @@
 //      - MisPrestamos : cualquier usuario autenticado (filtrado por LectorId).
 // ============================================================================
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaApp.Data;
+using BibliotecaApp.Helpers;
 using BibliotecaApp.Models;
 
 namespace BibliotecaApp.Controllers
@@ -42,28 +44,20 @@ namespace BibliotecaApp.Controllers
         [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Index(string? estado)
         {
-            // 1. Iniciamos la consulta LINQ incluyendo el libro asociado a cada préstamo
-            var prestamos = _context.Prestamos
-                .Include(p => p.Libro)
-                .AsQueryable();
+            // 1. Ejecutamos la consulta con el filtro elegido (si lo hay).
+            var prestamos = await ObtenerPrestamosFiltradosAsync(estado);
 
-            // 2. Evaluamos el valor elegido en el desplegable
-            if (estado == "pendiente")
-            {
-                // Préstamos activos: la fecha de devolución aún no se ha registrado (NULL)
-                prestamos = prestamos.Where(p => p.FechaDevolucion == null);
-            }
-            else if (estado == "devuelto")
-            {
-                // Préstamos ya devueltos: la fecha de devolución está registrada
-                prestamos = prestamos.Where(p => p.FechaDevolucion != null);
-            }
-
-            // 3. Enviamos la opción seleccionada a la vista para que el combobox no se reinicie
+            // 2. Enviamos la opción seleccionada a la vista para que el combobox no se reinicie
             ViewData["Estado"] = estado ?? "";
 
-            // 4. Ejecutamos la consulta de forma asíncrona y devolvemos la vista
-            return View(await prestamos.ToListAsync());
+            // 3. Petición htmx => solo el fragmento de la tabla (filtro instantáneo).
+            if (Request.IsHtmx())
+            {
+                return PartialView("_TablaPrestamos", prestamos);
+            }
+
+            // 4. Devolvemos la vista completa.
+            return View(prestamos);
         }
 
         /// <summary>
@@ -158,6 +152,35 @@ namespace BibliotecaApp.Controllers
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
+        }
+
+        /// <summary>
+        /// POST: registra la devolución poniendo FechaDevolucion = hoy
+        /// sin recargar la página (HTMX): devuelve la tabla filtrada y emite
+        /// HX-Trigger para que el cliente muestre una notificación.
+        /// </summary>
+        [HttpPost, ActionName("DevolverAjax")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
+        public async Task<IActionResult> DevolverAjax(int id, string? estado)
+        {
+            var prestamo = await _context.Prestamos.FindAsync(id);
+            if (prestamo == null) return NotFound();
+
+            // La fecha de devolución la pone el sistema (hoy).
+            prestamo.FechaDevolucion = DateTime.Today;
+            await _context.SaveChangesAsync();
+
+            // Notificación al cliente (la escucha el puente de site.js).
+            var trigger = new Dictionary<string, object>
+            {
+                ["toast"] = new { message = $"Devolución de «{prestamo.NombreUsuario}» registrada", type = "success" }
+            };
+            Response.Headers["HX-Trigger"] = JsonSerializer.Serialize(trigger);
+
+            // Se re-evalúa el mismo filtro que tenía aplicado el usuario.
+            var prestamos = await ObtenerPrestamosFiltradosAsync(estado);
+            return PartialView("_TablaPrestamos", prestamos);
         }
 
         /// <summary>
@@ -302,6 +325,33 @@ namespace BibliotecaApp.Controllers
         private bool PrestamoExists(int id)
         {
             return _context.Prestamos.Any(e => e.Id == id);
+        }
+
+        /// <summary>
+        /// Consulta de préstamos filtrada por estado (pendiente / devuelto / todos),
+        /// incluyendo el libro asociado a cada préstamo. La comparte Index y
+        /// DevolverAjax para que ambas mantengan la misma consulta.
+        /// </summary>
+        private async Task<List<Prestamo>> ObtenerPrestamosFiltradosAsync(string? estado)
+        {
+            // 1. Iniciamos la consulta LINQ incluyendo el libro asociado a cada préstamo
+            IQueryable<Prestamo> prestamos = _context.Prestamos
+                .Include(p => p.Libro)
+                .AsQueryable();
+
+            // 2. Evaluamos el valor elegido en el desplegable
+            if (estado == "pendiente")
+            {
+                // Préstamos activos: la fecha de devolución aún no se ha registrado (NULL)
+                prestamos = prestamos.Where(p => p.FechaDevolucion == null);
+            }
+            else if (estado == "devuelto")
+            {
+                // Préstamos ya devueltos: la fecha de devolución está registrada
+                prestamos = prestamos.Where(p => p.FechaDevolucion != null);
+            }
+
+            return await prestamos.ToListAsync();
         }
     }
 }

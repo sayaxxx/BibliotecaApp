@@ -118,6 +118,7 @@ namespace BibliotecaApp.Controllers
                 }
 
                 ModelState.AddModelError(string.Empty, "Credenciales inválidas.");
+                ViewData["ErrorMessage"] = "El correo o la contraseña no son correctos.";
             }
 
             return View(viewModel);

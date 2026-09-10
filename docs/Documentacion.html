@@ -234,6 +234,7 @@
       <li><a href="#frontend">9 · Frontend</a></li>
        <li><a href="#seed">10 · Migración y datos de ejemplo</a></li>
       <li><a href="#seguridad">11 · Seguridad (ASP.NET Core Identity)</a></li>
+      <li><a href="#htmx">12 · Frontend dinámico (HTMX + Alpine.js)</a></li>
     </ol>
   </div>
 
@@ -315,6 +316,8 @@ AttachDbFilename=C:\Users\hipho\Downloads\BibliotecaApp\App_Data\BibliotecaAppDb
 |-- Services/               <span class="c"># Capa de servicios (lógica de negocio)</span>
 |   |-- IAutorService.cs
 |   |-- AutorService.cs
+|-- Helpers/                <span class="c"># Extensiones auxiliares (HTMX)</span>
+|   |-- HtmxRequestExtensions.cs
 |-- Data/                   <span class="c"># Capa de acceso a datos</span>
 |   |-- ApplicationDbContext.cs  <span class="c"># IdentityDbContext</span>
 |   |-- DbSeeder.cs         <span class="c"># Roles + cuentas + catálogo</span>
@@ -323,7 +326,12 @@ AttachDbFilename=C:\Users\hipho\Downloads\BibliotecaApp\App_Data\BibliotecaAppDb
 |   |-- IdentityAuth.cs         <span class="c"># Tablas de Identity</span>
 |-- Views/                  <span class="c"># Vistas Razor por controlador</span>
 |   |-- Home/  Autores/  Libros/  Prestamos/  Account/  Shared/
-|-- wwwroot/                <span class="c"># Estáticos: css/site.css, lib/, js/</span>
+|   |   Autores/_TablaAutores.cshtml etc.  <span class="c"># Parciales intercambiables por HTMX</span>
+|-- wwwroot/                <span class="c"># Estáticos</span>
+|   |-- css/site.css        <span class="c"># Tema + animaciones + toasts</span>
+|   |-- js/site.js          <span class="c"># HTMX config + store/componentes Alpine</span>
+|   |-- lib/  htmx, alpinejs, bootstrap, jquery...
+|   |-- media/  # logo-book.svg, hero-books.svg, empty-books.svg, library.mp4
 |-- appsettings.json        <span class="c"># Cadena de conexión y configuración</span>
 |-- Program.cs              <span class="c"># Punto de entrada (host, DI, Identity, middleware)</span>
 |-- BibliotecaApp.csproj    <span class="c"># Archivo del proyecto</span></code></pre>
@@ -686,6 +694,82 @@ prestamos = prestamos.Where(p =&gt; p.FechaDevolucion != null);</code></pre>
         <td>Página de error 403 mostrada al intentar acceder a un recurso sin el rol adecuado.</td>
       </tr>
     </table>
+  </section>
+
+  <!-- ================= 12. Frontend dinámico ================= -->
+  <section class="card" id="htmx">
+    <h2>12 · Frontend dinámico (HTMX + Alpine.js)</h2>
+    <p>
+      BibliotecaApp integra <strong>HTMX</strong> y <strong>Alpine.js</strong> (ambos en
+      <code class="hli">wwwroot/lib</code>, sin CDN) sobre las vistas Razor para lograr
+      un frontend moderno y dinámico sin escribir JavaScript por página.
+    </p>
+
+    <h3>12.1 · Patrones HTMX aplicados</h3>
+    <table>
+      <tr><th>Patrón</th><th>Cómo funciona</th><th>Dónde</th></tr>
+      <tr>
+        <td>Búsqueda instantánea</td>
+        <td>El input envía <code class="hli">hx-get</code> con debounce (400 ms); el controlador detecta
+        la cabecera <code class="hli">HX-Request</code> y devuelve la parcial <code class="hli">_TablaAutores</code>,
+        sustituyendo solo la tabla.</td>
+        <td>Autores/Index</td>
+      </tr>
+      <tr>
+        <td>Filtro dinámico</td>
+        <td>El combobox dispara <code class="hli">hx-trigger="change"</code> hacia el controlador que
+        responde con <code class="hli">_TablaLibros</code> / <code class="hli">_TablaPrestamos</code>.</td>
+        <td>Libros/Index, Prestamos/Index</td>
+      </tr>
+      <tr>
+        <td>Acción sin recargar</td>
+        <td>El botón "Devolver" hace <code class="hli">hx-post</code> a <code class="hli">DevolverAjax</code>;
+        el servidor guarda la devolución, devuelve la tabla filtrada (<code class="hli">hx-include</code> del
+        combobox <code class="hli">#estadoPrestamo</code>) y emite <code class="hli">HX-Trigger {"toast": ...}</code>.</td>
+        <td>Prestamos/Index</td>
+      </tr>
+    </table>
+
+    <h3>12.2 · Seguridad CSRF con HTMX</h3>
+    <pre><code><span class="k">wwwroot/js/site.js → htmx:configRequest</span>
+<span class="c">// Toda petición htmx que NO sea GET lleva el token antiforgery</span>
+document.body.addEventListener("htmx:configRequest", function (e) {
+  var token = document.querySelector('input[name="__RequestVerificationToken"]');
+  if (token &amp;&amp; e.detail.verb.toLowerCase() !== "get") {
+    e.detail.headers["X-RequestVerificationToken"] = token.value;
+  }
+});</code></pre>
+    <p>
+      El controlador no cambia: sigue usando <code class="hli">[ValidateAntiForgeryToken]</code> y
+      <code class="hli">[Authorize(Roles=...)]</code>. La detección de htmx se centraliza en
+      <code class="hli">Helpers/HtmxRequestExtensions.cs</code> (<code class="hli">Request.IsHtmx()</code>).
+    </p>
+    <div class="note">
+      Por defecto ASP.NET Core solo acepta la cabecera <code class="hli">RequestVerificationToken</code>;
+      en <code class="hli">Program.cs</code> se configura
+      <code class="hli">services.AddAntiforgery(o =&gt; o.HeaderName = "X-RequestVerificationToken")</code>
+      para que el token que inyecta htmx sea validado.
+    </div>
+
+    <h3>12.3 · Componentes Alpine.js</h3>
+    <table>
+      <tr><th>Componente</th><th>Descripción</th></tr>
+      <tr><td><code class="hli">Alpine.store('toast')</code></td><td>Pila de notificaciones con auto-cierre; los controladores la disparan con <code class="hli">HX-Trigger</code>.</td></tr>
+      <tr><td><code class="hli">Alpine.data('countUp')</code></td><td>Contadores animados de las estadísticas al entrar en pantalla (IntersectionObserver).</td></tr>
+      <tr><td><code class="hli">Alpine.data('quote')</code></td><td>Carrusel de citas literarias rotativas en la portada.</td></tr>
+      <tr><td><code class="hli">x-on:click</code> en formularios</td><td>Navegación móvil, mostrar/ocultar contraseña y relleno rápido de cuentas demo en Login.</td></tr>
+    </table>
+    <div class="note">
+      En vistas Razor se usa <code class="hli">x-on:click</code> en lugar de <code class="hli">@click</code>,
+      ya que el carácter <code class="hli">@</code> colisiona con la sintaxis de Razor.
+    </div>
+
+    <h3>12.4 · Medios de biblioteca (local, sin CDN)</h3>
+    <ul class="cap">
+      <li><strong>Imágenes SVG</strong>: <code class="hli">logo-book.svg</code> (marca), <code class="hli">hero-books.svg</code> (ilustración de la portada), <code class="hli">empty-books.svg</code> (estados vacíos).</li>
+      <li><strong>Vídeo ambient</strong>: <code class="hli">library.mp4</code> (CC0 de Pexels, autoplay mudo y en bucle) con fallback a imagen si no se puede reproducir.</li>
+      <li><strong>Animaciones CSS</strong>: cinta de libros estilo gif (marquee), motivos flotantes en el hero y transiciones de toasts.</li>
+    </ul>
   </section>
 
 </main>

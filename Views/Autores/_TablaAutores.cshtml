@@ -1,0 +1,52 @@
+@* ============================================================================
+   Parcial: Autores/_TablaAutores
+   Fragmento intercambiable por HTMX (búsqueda instantánea por nombre).
+   El contenedor conserva el mismo id para que el swap outerHTML no ko el target.
+   ============================================================================ *@
+@model IEnumerable<AutorIndexViewModel>
+
+<div id="autoresContainer">
+    @if (!Model.Any())
+    {
+        <div class="panel empty-state">
+            <img src="~/media/empty-books.svg" alt="Sin autores" class="empty-icon mb-2" style="width:110px;height:80px;opacity:0.9;" />
+            <h3 class="h5 fw-600">No se encontraron autores</h3>
+            <p>Prueba con otro término de búsqueda.</p>
+            <a asp-action="Create" class="btn btn-primary mt-2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg me-1" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>Nuevo Autor</a>
+        </div>
+    }
+    else
+    {
+        <div class="panel">
+            <div class="table-responsive">
+                <table class="table table-modern table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Nacionalidad</th>
+                            <th>Fecha de Nacimiento</th>
+                            <th>Libros</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var autor in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@autor.Nombre</td>
+                                <td>@autor.Nacionalidad</td>
+                                <td>@(autor.FechaNacimiento?.ToString("dd/MM/yyyy") ?? "—")</td>
+                                <td><span class="badge badge-soft-primary">@autor.TotalLibros libro(s)</span></td>
+                                <td class="text-end text-nowrap">
+                                    <a asp-action="Details" asp-route-id="@autor.Id" class="btn btn-sm btn-outline-primary" title="Ver detalles">Detalles</a>
+                                    <a asp-action="Edit" asp-route-id="@autor.Id" class="btn btn-sm btn-warning" title="Editar">Editar</a>
+                                    <a asp-action="Delete" asp-route-id="@autor.Id" class="btn btn-sm btn-danger" title="Eliminar">Eliminar</a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

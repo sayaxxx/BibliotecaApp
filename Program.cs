@@ -22,6 +22,10 @@ var builder = WebApplication.CreateBuilder(args);
 // 2a. Registro de MVC (controladores + vistas Razor).
 builder.Services.AddControllersWithViews();
 
+// 2a2. Antiforgery: aceptar la cabecera X-RequestVerificationToken que envía HTMX
+//      (por defecto ASP.NET Core solo reconoce "RequestVerificationToken").
+builder.Services.AddAntiforgery(options => options.HeaderName = "X-RequestVerificationToken");
+
 // 2b. Registro de Entity Framework Core con SQL Server.
 //     La base de datos se crea en App_Data mediante AttachDbFilename
 //     (ver appsettings.json) y el esquema se aplica con las migraciones.

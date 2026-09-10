@@ -1,0 +1,67 @@
+@* ============================================================================
+   Parcial: Libros/_TablaLibros
+   Fragmento intercambiable por HTMX (filtro instantáneo por estado).
+   ============================================================================ *@
+@model IEnumerable<Libro>
+
+<div id="librosContainer">
+    @if (!Model.Any())
+    {
+        <div class="panel empty-state">
+            <img src="~/media/empty-books.svg" alt="Sin libros" class="empty-icon mb-2" style="width:110px;height:80px;opacity:0.9;" />
+            <h3 class="h5 fw-600">No se encontraron libros</h3>
+            <p>No hay libros con el estado seleccionado.</p>
+            <a asp-action="Create" class="btn btn-primary mt-2"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg me-1" viewBox="0 0 16 16"><path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>Nuevo Libro</a>
+        </div>
+    }
+    else
+    {
+        <div class="panel">
+            <div class="table-responsive">
+                <table class="table table-modern table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Título</th>
+                            <th>ISBN</th>
+                            <th>Año</th>
+                            <th>Autor</th>
+                            <th>Estado</th>
+                            <th class="text-end">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var i = 1; }
+                        @foreach (var item in Model)
+                        {
+                            var prestado = item.Prestamos.Any(p => p.FechaDevolucion == null);
+                            <tr>
+                                <td class="text-muted">@i</td>
+                                <td class="fw-semibold">@item.Titulo</td>
+                                <td>@item.ISBN</td>
+                                <td><span class="badge badge-soft-secondary">@item.AnioPublicacion</span></td>
+                                <td><span class="badge badge-soft-info">@(item.Autor?.Nombre ?? "Sin autor")</span></td>
+                                <td>
+                                    @if (prestado)
+                                    {
+                                        <span class="badge badge-soft-danger">Prestado</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-soft-success">Disponible</span>
+                                    }
+                                </td>
+                                <td class="text-end text-nowrap">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Ver detalles">Detalles</a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="Editar">Editar</a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="Eliminar">Eliminar</a>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

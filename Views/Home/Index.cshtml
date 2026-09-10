@@ -1,28 +1,62 @@
 ﻿@* ============================================================================
    Vista: Home / Index (dashboard)
-   Pantalla de bienvenida con estadísticas globales (ViewBag) provenientes de
-   HomeController.Index: total de autores/libros, disponibles, préstamos activos
-   y los 5 libros más recientes.
+   Portada moderna con:
+     - Hero con gradiente + ilustración de biblioteca (SVG local) y motivos
+       flotantes animados por CSS.
+     - Estadísticas globales (ViewBag de HomeController) con contadores
+       animados por Alpine (x-data="countUp").
+     - Cita bibliotecaria rotativa (componente Alpine "quote").
+     - Accesos rápidos como tarjetas con flecha animada.
+     - Franja de vídeo ambient ambient (library.mp4 local, autoplay mudo),
+       con cinta tipo gif de libros animada y últimos libros registrados.
    ============================================================================ *@
 @{
     ViewData["Title"] = "Inicio";
 }
 
-<section class="hero mb-4">
-    <h1>Bienvenido a 📚 BibliotecaApp</h1>
-    <p class="mt-2">Sistema de gestión bibliotecaria. Administra autores, libros y préstamos desde un solo lugar, con una arquitectura limpia en capas.</p>
-    <div class="mt-4">
-        <a asp-controller="Libros" asp-action="Index" class="btn btn-white btn-lg me-2">Explorar Libros</a>
-        <a asp-controller="Prestamos" asp-action="Create" class="btn btn-outline-light btn-lg">Registrar Préstamo</a>
+<!-- ============ HERO ============ -->
+<section class="hero-modern mb-4">
+    <span class="hero-float" style="top:12%;left:4%;animation-delay:0s;">📖</span>
+    <span class="hero-float" style="top:68%;left:10%;animation-delay:0.8s;">✨</span>
+    <span class="hero-float" style="top:18%;right:6%;animation-delay:1.4s;">📚</span>
+    <span class="hero-float" style="bottom:14%;right:38%;animation-delay:2s;">🔖</span>
+
+    <div class="row align-items-center g-4 position-relative">
+        <div class="col-lg-7">
+            <h1 class="mb-3">Bienvenido a BibliotecaApp <span class="d-inline-block">📚</span></h1>
+            <p class="lead mb-3">
+                Sistema de gestión bibliotecaria. Administra autores, libros y préstamos
+                desde un solo lugar, con búsquedas y filtros instantáneos.
+            </p>
+            <div class="hero-chips mb-4">
+                <span class="chip">⚡ Búsqueda instantánea</span>
+                <span class="chip">🔐 Inicio de sesión seguro</span>
+                <span class="chip">📖 Catálogo en línea</span>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="Libros" asp-action="Index" class="btn btn-white btn-lg">
+                    Explorar Libros →
+                </a>
+                <a asp-controller="Prestamos" asp-action="Index" class="btn btn-outline-light btn-lg">
+                    Ver Préstamos
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-5 d-none d-lg-block">
+            <div class="hero-media">
+                <img src="~/media/hero-books.svg" alt="Biblioteca ilustrada" />
+            </div>
+        </div>
     </div>
 </section>
 
+<!-- ============ ESTADÍSTICAS (contadores animados con Alpine) ============ -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-lg-3">
         <div class="stat-card">
             <span class="stat-icon ic-indigo">👤</span>
             <div>
-                <div class="stat-value">@ViewBag.TotalAutores</div>
+                <div class="stat-value" x-data="countUp(@ViewBag.TotalAutores)" x-text="value">@ViewBag.TotalAutores</div>
                 <div class="stat-label">Autores</div>
             </div>
         </div>
@@ -31,7 +65,7 @@
         <div class="stat-card">
             <span class="stat-icon ic-emerald">📖</span>
             <div>
-                <div class="stat-value">@ViewBag.TotalLibros</div>
+                <div class="stat-value" x-data="countUp(@ViewBag.TotalLibros)" x-text="value">@ViewBag.TotalLibros</div>
                 <div class="stat-label">Libros</div>
             </div>
         </div>
@@ -40,7 +74,7 @@
         <div class="stat-card">
             <span class="stat-icon ic-sky">✅</span>
             <div>
-                <div class="stat-value">@ViewBag.TotalLibrosDisponibles</div>
+                <div class="stat-value" x-data="countUp(@ViewBag.TotalLibrosDisponibles)" x-text="value">@ViewBag.TotalLibrosDisponibles</div>
                 <div class="stat-label">Disponibles</div>
             </div>
         </div>
@@ -49,55 +83,132 @@
         <div class="stat-card">
             <span class="stat-icon ic-rose">🔄</span>
             <div>
-                <div class="stat-value">@ViewBag.TotalPrestamosActivos</div>
+                <div class="stat-value" x-data="countUp(@ViewBag.TotalPrestamosActivos)" x-text="value">@ViewBag.TotalPrestamosActivos</div>
                 <div class="stat-label">Préstamos activos</div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row g-4">
+<!-- ============ CITA DEL DÍA + ACCESOS RÁPIDOS ============ -->
+<div class="row g-4 mb-4">
     <div class="col-lg-5">
-        <h2 class="h5 fw-700 mb-3">Accesos rápidos</h2>
+        <div class="quote-card h-100">
+            <span class="section-label">Cita bibliotecaria</span>
+            <p class="quote-quote mb-2"
+               x-data="quote('Los libros son espejos: solo se ve en ellos lo que uno lleva dentro.', 'Carlos Ruiz Zafón')"
+               :class="{ 'opacity-50': fade }"
+               x-text="text"></p>
+            <div class="d-flex justify-content-between align-items-end">
+                <span class="quote-author" x-text="author"></span>
+                <span class="quote-tick">
+                    <span class="dot on"></span><span class="dot"></span><span class="dot"></span>
+                </span>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="section-label">Accesos rápidos</div>
         <div class="d-flex flex-column gap-3">
             <a asp-controller="Autores" asp-action="Index" class="quick-link">
-                <span class="ql-icon" style="background: #e0e7ff; color: #4338ca;">👤</span>
+                <span class="ql-icon" style="background:#e0e7ff;color:#4338ca;">👤</span>
                 <div>
                     <div class="ql-title">Autores</div>
                     <p class="ql-desc">Gestiona el catálogo de autores</p>
                 </div>
+                <span class="ql-arrow">→</span>
             </a>
             <a asp-controller="Libros" asp-action="Index" class="quick-link">
-                <span class="ql-icon" style="background: #d1fae5; color: #047857;">📖</span>
+                <span class="ql-icon" style="background:#d1fae5;color:#047857;">📖</span>
                 <div>
                     <div class="ql-title">Libros</div>
                     <p class="ql-desc">Consulta disponibilidad y estado</p>
                 </div>
+                <span class="ql-arrow">→</span>
             </a>
             <a asp-controller="Prestamos" asp-action="Index" class="quick-link">
-                <span class="ql-icon" style="background: #e0f2fe; color: #0369a1;">🔄</span>
+                <span class="ql-icon" style="background:#e0f2fe;color:#0369a1;">🔄</span>
                 <div>
                     <div class="ql-title">Préstamos</div>
                     <p class="ql-desc">Registra y da seguimiento a préstamos</p>
                 </div>
+                <span class="ql-arrow">→</span>
             </a>
         </div>
     </div>
-    <div class="col-lg-7">
-        <h2 class="h5 fw-700 mb-3">Últimos libros registrados</h2>
+</div>
+
+<!-- ============ FRANJA DE VÍDEO (ambient) ============ -->
+<div class="media-frame mb-4" style="height: 300px;">
+    <video autoplay muted loop playsinline preload="metadata" aria-label="Vídeo ambient de biblioteca">
+        <source src="@Url.Content("~/media/library.mp4")" type="video/mp4" />
+        <!-- Fallback si el vídeo no se puede reproducir -->
+        <img src="~/media/hero-books.svg" alt="Biblioteca" style="width:100%;object-fit:cover;" />
+    </video>
+    <div class="media-overlay">
+        <h2 class="h4 fw-700 mb-1">La biblioteca, en movimiento</h2>
+        <p class="mb-0 small opacity-75">Cada estantería guarda una historia por contar.</p>
+    </div>
+</div>
+
+<!-- ============ CINTA ANIMADA (estilo gif) ============ -->
+<div class="book-marquee mb-5">
+    <div class="book-marquee-track">
+        <span>📚 Cien Años de Soledad</span>
+        <span>📖 Ficciones</span>
+        <span>📕 El Amor en los Tiempos del Cólera</span>
+        <span>📗 La Ciudad y los Perros</span>
+        <span>📘 La Biblioteca de Babel</span>
+        <span>📙 Rayuela</span>
+        <span>📕 El Quijote</span>
+        <span>📗 Crónica de una Muerte Anunciada</span>
+        <span>📚 Cien Años de Soledad</span>
+        <span>📖 Ficciones</span>
+        <span>📕 El Amor en los Tiempos del Cólera</span>
+        <span>📗 La Ciudad y los Perros</span>
+        <span>📘 La Biblioteca de Babel</span>
+        <span>📙 Rayuela</span>
+        <span>📕 El Quijote</span>
+        <span>📗 Crónica de una Muerte Anunciada</span>
+    </div>
+</div>
+
+<!-- ============ ÚLTIMOS LIBROS ============ -->
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="section-label">Últimos libros registrados</div>
         <div class="panel">
             <ul class="list-group list-group-flush recent-list">
+                @{ var idx = 0; }
                 @foreach (var libro in ViewBag.UltimosLibros)
                 {
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="fw-semibold">@libro.Titulo</span>
-                            <span class="text-muted d-block small">@libro.ISBN</span>
+                    <li class="list-group-item d-flex justify-content-between align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="cover cover-@(idx % 5)">📖</span>
+                            <div>
+                                <span class="fw-semibold">@libro.Titulo</span>
+                                <span class="text-muted d-block small">ISBN @libro.ISBN</span>
+                            </div>
                         </div>
                         <span class="badge badge-soft-secondary">@libro.AnioPublicacion</span>
                     </li>
+                    idx++;
                 }
             </ul>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="section-label">¿Cómo funciona?</div>
+        <div class="panel panel-body">
+            <p class="mb-3">BibliotecaApp está construida con <strong>ASP.NET Core MVC</strong> e integra
+            <strong>HTMX + Alpine.js</strong> para una experiencia ágil:</p>
+            <ul class="cap mb-3">
+                <li><strong>Búsqueda instantánea</strong> de autores y <strong>filtros dinámicos</strong> de libros y préstamos sin recargar la página (HTMX).</li>
+                <li><strong>Devoluciones rápidas</strong> desde la tabla de Préstamos con notificación visual (HTMX + toasts de Alpine).</li>
+                <li><strong>Contadores y citas animadas</strong> que reaccionan al desplazamiento (Alpine.js).</li>
+                <li><strong>Autenticación por roles</strong> con ASP.NET Core Identity.</li>
+            </ul>
+            <a asp-controller="Autores" asp-action="Index" class="btn btn-primary">Comenzar a explorar</a>
         </div>
     </div>
 </div>

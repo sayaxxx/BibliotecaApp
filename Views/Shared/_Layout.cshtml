@@ -2,8 +2,14 @@
    Layout principal (Shared/_Layout)
    Define la estructura HTML de todas las páginas: navbar con gradiente y
    estado activo por controlador, contenedor del RenderBody y footer.
-   Carga los estilos (Bootstrap + site.css) y scripts (jQuery, Bootstrap JS).
-   Incluye _LoginPartial para autenticación y menús condicionales por rol.
+   Carga los estilos (Bootstrap + site.css) y scripts (jQuery, Bootstrap JS,
+   HTMX y Alpine.js).
+   ----------------------------------------------------------------------------
+   HTMX  : mejoras progresivas AJAX (búsquedas/filtros instantáneos, acciones
+           parciales como devoluciones, toast server->cliente via HX-Trigger).
+   Alpine: interactividad declarativa (toasts, contador de stats, contraseñas).
+   El token antiforgery se inyecta como cabecera X-RequestVerificationToken en
+   todas las peticiones htmx que NO sean GET (configRequest en site.js).
    ============================================================================ *@
 @{
     var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
@@ -21,20 +27,41 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/BibliotecaApp.styles.css" asp-append-version="true" />
+    <script defer src="~/lib/htmx/htmx.min.js"></script>
+    <script defer src="~/lib/alpinejs/alpine.min.js"></script>
 </head>
 <body>
+    @Html.AntiForgeryToken()
+
+    <!-- Contenedor de notificaciones (Alpine store definida en site.js) -->
+    <div x-data class="toast-stack" aria-live="polite" aria-atomic="true">
+        <template x-for="t in $store.toast.items" :key="t.id">
+            <div class="toast-item" :class="'toast-' + t.type"
+                 x-show="t.visible"
+                 x-transition:enter="toast-enter"
+                 x-transition:enter-start="toast-enter-start"
+                 x-transition:enter-end="toast-enter-end"
+                 x-transition:leave="toast-leave"
+                 x-transition:leave-end="toast-leave-end">
+                <span class="toast-icon" x-text="t.icon"></span>
+                <span class="toast-msg" x-text="t.message"></span>
+                <button type="button" class="toast-close" x-on:click="$store.toast.remove(t.id)" aria-label="Cerrar">&times;</button>
+            </div>
+        </template>
+    </div>
+
     <header>
-        <nav class="navbar navbar-expand-md site-navbar">
+        <nav class="navbar navbar-expand-md site-navbar" x-data="{ open: false }">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    <span class="brand-badge">📚</span>
+                    <span class="brand-badge"><img src="~/media/logo-book.svg" alt="BibliotecaApp" /></span>
                     <span>BibliotecaApp</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+                <button class="navbar-toggler" type="button" x-on:click="open = !open"
                         aria-controls="navbarMain" aria-expanded="false" aria-label="Abrir navegación">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="collapse navbar-collapse" id="navbarMain">
+                <div class="collapse navbar-collapse" id="navbarMain" :class="{ 'show': open }">
                     <ul class="navbar-nav align-items-md-center">
                         <li class="nav-item">
                             <a class="nav-link @(controller == "Home" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
@@ -82,6 +109,7 @@
             <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

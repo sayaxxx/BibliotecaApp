@@ -9,15 +9,20 @@
 
 <div class="row justify-content-center">
     <div class="col-lg-7">
-        <div class="panel text-center border-danger">
+        <div class="panel text-center">
             <div class="panel-body py-5">
-                <div class="empty-icon">🚫</div>
-                <h1 class="h3 fw-700 mt-3">Acceso Denegado</h1>
+                <img src="~/media/empty-books.svg" alt="Sin acceso" style="width:150px;height:100px;opacity:0.85;" class="mb-2" />
+                <h1 class="h3 fw-700 mt-2">🚫 Acceso Denegado</h1>
                 <p class="text-muted">Tu cuenta no tiene permisos suficientes para ver esta página.</p>
                 <p class="small text-muted">
-                    Si crees que es un error, contacta con el administrador del sistema.
+                    El contenido está reservado para <strong>Administradores</strong> y
+                    <strong>Bibliotecarios</strong>. Si crees que es un error, contacta con el
+                    administrador del sistema.
                 </p>
-                <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-2">Volver al inicio</a>
+                <div class="d-flex gap-2 justify-content-center mt-3">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Volver al inicio</a>
+                    <a asp-controller="Prestamos" asp-action="MisPrestamos" class="btn btn-light">Mis Préstamos</a>
+                </div>
             </div>
         </div>
     </div>

@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaApp.Data;
+using BibliotecaApp.Helpers;
 using BibliotecaApp.Models;
 
 namespace BibliotecaApp.Controllers
@@ -56,7 +57,15 @@ namespace BibliotecaApp.Controllers
             ViewData["Estado"] = estado ?? "";
 
             // 4. Ejecutamos la consulta en SQL de forma asíncrona y devolvemos la vista
-            return View(await libros.ToListAsync());
+            var resultado = await libros.ToListAsync();
+
+            // Petición htmx => solo el fragmento de la tabla (filtro instantáneo).
+            if (Request.IsHtmx())
+            {
+                return PartialView("_TablaLibros", resultado);
+            }
+
+            return View(resultado);
         }
 
         /// <summary>

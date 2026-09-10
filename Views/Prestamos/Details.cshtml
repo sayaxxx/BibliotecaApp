@@ -1,0 +1,64 @@
+@* ============================================================================
+   Vista: Prestamos / Details
+   Detalle de un préstamo con badge de estado: "Devuelto" si hay fecha de
+   devolución registrada, o "Pendiente de devolución" en caso contrario.
+   ============================================================================ *@
+@model Prestamo
+
+@{
+    ViewData["Title"] = "Detalles del Préstamo";
+}
+
+<div class="page-header">
+    <div>
+        <h1><span class="header-icon">🔄</span>Detalles del Préstamo</h1>
+        <p class="page-subtitle">Información completa del préstamo seleccionado</p>
+    </div>
+    <a asp-action="Index" class="btn btn-light">&larr; Volver a la lista</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">@Model.NombreUsuario</h2>
+                @if (Model.FechaDevolucion.HasValue)
+                {
+                    <span class="badge badge-soft-success">Devuelto</span>
+                }
+                else
+                {
+                    <span class="badge badge-soft-danger">Pendiente de devolución</span>
+                }
+            </div>
+            <div class="panel-body">
+                <dl class="row detail-card mb-0">
+                    <dt class="col-sm-4">Usuario</dt>
+                    <dd class="col-sm-8">@Model.NombreUsuario</dd>
+
+                    <dt class="col-sm-4">Libro</dt>
+                    <dd class="col-sm-8">@(Model.Libro?.Titulo ?? "Sin libro")</dd>
+
+                    <dt class="col-sm-4">Fecha de Préstamo</dt>
+                    <dd class="col-sm-8">@Model.FechaPrestamo.ToString("dd/MM/yyyy")</dd>
+
+                    <dt class="col-sm-4">Fecha de Devolución</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.FechaDevolucion.HasValue)
+                        {
+                            <span class="badge badge-soft-success">@Model.FechaDevolucion.Value.ToString("dd/MM/yyyy")</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-soft-danger">No devuelto</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+            <div class="panel-body pt-0 d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>

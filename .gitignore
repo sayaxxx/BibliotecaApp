@@ -1,0 +1,47 @@
+# ============================================================================
+#  .gitignore · BibliotecaApp
+# ----------------------------------------------------------------------------
+#  Excluye del repositorio los archivos y carpetas que SE GENERAN solos o son
+#  propios de cada máquina, para subir solo el código fuente a GitHub.
+#  Secciones: build, IDE, base de datos LocalDB, logs, NuGet y SO.
+# ============================================================================
+
+# ---------- Compilación / ejecución ----------
+bin/
+obj/
+
+# ---------- IDE ----------
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+
+# ---------- Base de datos LocalDB (se regenera con las migraciones) ----------
+# La carpeta App_Data se conserva en el repo mediante App_Data/.gitkeep,
+# pero los ficheros de SQL Server (.mdf/.ldf) no deben subirse.
+App_Data/*.mdf
+App_Data/*.ldf
+*.mdf
+*.ldf
+
+# ---------- Logs y temporales ----------
+logs/
+Temp/
+*.log
+*.tmp
+
+# ---------- NuGet ----------
+*.nupkg
+packages/
+
+# ---------- Resultados de pruebas ----------
+TestResults/
+*.trx
+coverage/
+
+# ---------- Sistema operativo ----------
+Thumbs.db
+Desktop.ini
+.DS_Store

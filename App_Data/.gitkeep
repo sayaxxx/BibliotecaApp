@@ -1,0 +1,3 @@
+# Carpeta reservada para la base de datos LocalDB (App_Data/BibliotecaAppDb.mdf).
+# El fichero .gitkeep mantiene esta carpeta en el repositorio; los .mdf/.ldf
+# están ignorados en .gitignore porque se regeneran al ejecutar la aplicación.

@@ -1,0 +1,70 @@
+@* ============================================================================
+   Vista: Prestamos / Create
+   Formulario de alta de préstamo. Permite registrar una fecha de devolución
+   opcional (si se deja vacía, el préstamo queda "pendiente").
+   ============================================================================ *@
+@model Prestamo
+
+@{
+    ViewData["Title"] = "Crear Préstamo";
+}
+
+<div class="page-header">
+    <div>
+        <h1><span class="header-icon">➕</span>Crear Préstamo</h1>
+        <p class="page-subtitle">Registra un nuevo préstamo de libro</p>
+    </div>
+    <a asp-action="Index" class="btn btn-light">&larr; Volver a la lista</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Datos del préstamo</h2>
+            </div>
+            <div class="panel-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="NombreUsuario" class="form-label"></label>
+                        <input asp-for="NombreUsuario" class="form-control" placeholder="Ej: Juan Pérez" />
+                        <span asp-validation-for="NombreUsuario" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FechaPrestamo" class="form-label"></label>
+                        <input asp-for="FechaPrestamo" class="form-control" type="date" />
+                        <span asp-validation-for="FechaPrestamo" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="FechaDevolucion" class="form-label"></label>
+                        <input asp-for="FechaDevolucion" class="form-control" type="date" />
+                        <span asp-validation-for="FechaDevolucion" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="LibroId" class="form-label"></label>
+                        <select asp-for="LibroId" class="form-select" asp-items="ViewBag.LibroId">
+                            <option value="">-- Seleccione un Libro --</option>
+                        </select>
+                        <span asp-validation-for="LibroId" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">Crear Préstamo</button>
+                        <a asp-action="Index" class="btn btn-light">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

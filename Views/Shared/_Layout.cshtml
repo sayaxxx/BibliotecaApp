@@ -1,0 +1,74 @@
+﻿@* ============================================================================
+   Layout principal (Shared/_Layout)
+   Define la estructura HTML de todas las páginas: navbar con gradiente y
+   estado activo por controlador, contenedor del RenderBody y footer.
+   Carga los estilos (Bootstrap + site.css) y scripts (jQuery, Bootstrap JS).
+   ============================================================================ *@
+@{
+    // Nombre del controlador actual: se usa para marcar el enlace activo.
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - BibliotecaApp</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/BibliotecaApp.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-md site-navbar">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <span class="brand-badge">📚</span>
+                    <span>BibliotecaApp</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain"
+                        aria-controls="navbarMain" aria-expanded="false" aria-label="Abrir navegación">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarMain">
+                    <ul class="navbar-nav ms-auto align-items-md-center">
+                        <li class="nav-item">
+                            <a class="nav-link @(controller == "Home" ? "active" : "")" asp-area="" asp-controller="Home" asp-action="Index">Inicio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(controller == "Autores" ? "active" : "")" asp-area="" asp-controller="Autores" asp-action="Index">Autores</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(controller == "Libros" ? "active" : "")" asp-area="" asp-controller="Libros" asp-action="Index">Libros</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link @(controller == "Prestamos" ? "active" : "")" asp-area="" asp-controller="Prestamos" asp-action="Index">Préstamos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main role="main" class="py-4">
+        <div class="container">
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container d-flex justify-content-between align-items-center">
+            <span>&copy; 2026 - BibliotecaApp</span>
+            <span class="d-none d-md-inline text-muted">Sistema de gestión bibliotecaria</span>
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacidad</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

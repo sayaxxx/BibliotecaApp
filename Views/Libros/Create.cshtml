@@ -1,0 +1,70 @@
+@* ============================================================================
+   Vista: Libros / Create
+   Formulario de alta de libro. El desplegable "Autor" se rellena desde
+   ViewBag.AutorId (SelectList cargado en el controlador).
+   ============================================================================ *@
+@model Libro
+
+@{
+    ViewData["Title"] = "Crear Libro";
+}
+
+<div class="page-header">
+    <div>
+        <h1><span class="header-icon">➕</span>Crear Libro</h1>
+        <p class="page-subtitle">Registra un nuevo libro en el catálogo</p>
+    </div>
+    <a asp-action="Index" class="btn btn-light">&larr; Volver a la lista</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Datos del libro</h2>
+            </div>
+            <div class="panel-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Titulo" class="form-label"></label>
+                        <input asp-for="Titulo" class="form-control" placeholder="Ej: Cien Años de Soledad" />
+                        <span asp-validation-for="Titulo" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="ISBN" class="form-label"></label>
+                        <input asp-for="ISBN" class="form-control" placeholder="Ej: 978-0307474728" />
+                        <span asp-validation-for="ISBN" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="AnioPublicacion" class="form-label"></label>
+                        <input asp-for="AnioPublicacion" class="form-control" placeholder="Ej: 1967" />
+                        <span asp-validation-for="AnioPublicacion" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="AutorId" class="form-label"></label>
+                        <select asp-for="AutorId" class="form-select" asp-items="ViewBag.AutorId">
+                            <option value="">-- Seleccione un Autor --</option>
+                        </select>
+                        <span asp-validation-for="AutorId" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">Crear Libro</button>
+                        <a asp-action="Index" class="btn btn-light">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

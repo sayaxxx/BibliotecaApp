@@ -1,0 +1,103 @@
+﻿@* ============================================================================
+   Vista: Home / Index (dashboard)
+   Pantalla de bienvenida con estadísticas globales (ViewBag) provenientes de
+   HomeController.Index: total de autores/libros, disponibles, préstamos activos
+   y los 5 libros más recientes.
+   ============================================================================ *@
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+<section class="hero mb-4">
+    <h1>Bienvenido a 📚 BibliotecaApp</h1>
+    <p class="mt-2">Sistema de gestión bibliotecaria. Administra autores, libros y préstamos desde un solo lugar, con una arquitectura limpia en capas.</p>
+    <div class="mt-4">
+        <a asp-controller="Libros" asp-action="Index" class="btn btn-white btn-lg me-2">Explorar Libros</a>
+        <a asp-controller="Prestamos" asp-action="Create" class="btn btn-outline-light btn-lg">Registrar Préstamo</a>
+    </div>
+</section>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <span class="stat-icon ic-indigo">👤</span>
+            <div>
+                <div class="stat-value">@ViewBag.TotalAutores</div>
+                <div class="stat-label">Autores</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <span class="stat-icon ic-emerald">📖</span>
+            <div>
+                <div class="stat-value">@ViewBag.TotalLibros</div>
+                <div class="stat-label">Libros</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <span class="stat-icon ic-sky">✅</span>
+            <div>
+                <div class="stat-value">@ViewBag.TotalLibrosDisponibles</div>
+                <div class="stat-label">Disponibles</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <span class="stat-icon ic-rose">🔄</span>
+            <div>
+                <div class="stat-value">@ViewBag.TotalPrestamosActivos</div>
+                <div class="stat-label">Préstamos activos</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <h2 class="h5 fw-700 mb-3">Accesos rápidos</h2>
+        <div class="d-flex flex-column gap-3">
+            <a asp-controller="Autores" asp-action="Index" class="quick-link">
+                <span class="ql-icon" style="background: #e0e7ff; color: #4338ca;">👤</span>
+                <div>
+                    <div class="ql-title">Autores</div>
+                    <p class="ql-desc">Gestiona el catálogo de autores</p>
+                </div>
+            </a>
+            <a asp-controller="Libros" asp-action="Index" class="quick-link">
+                <span class="ql-icon" style="background: #d1fae5; color: #047857;">📖</span>
+                <div>
+                    <div class="ql-title">Libros</div>
+                    <p class="ql-desc">Consulta disponibilidad y estado</p>
+                </div>
+            </a>
+            <a asp-controller="Prestamos" asp-action="Index" class="quick-link">
+                <span class="ql-icon" style="background: #e0f2fe; color: #0369a1;">🔄</span>
+                <div>
+                    <div class="ql-title">Préstamos</div>
+                    <p class="ql-desc">Registra y da seguimiento a préstamos</p>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <h2 class="h5 fw-700 mb-3">Últimos libros registrados</h2>
+        <div class="panel">
+            <ul class="list-group list-group-flush recent-list">
+                @foreach (var libro in ViewBag.UltimosLibros)
+                {
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-semibold">@libro.Titulo</span>
+                            <span class="text-muted d-block small">@libro.ISBN</span>
+                        </div>
+                        <span class="badge badge-soft-secondary">@libro.AnioPublicacion</span>
+                    </li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>

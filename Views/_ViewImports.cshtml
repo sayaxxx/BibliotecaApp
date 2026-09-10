@@ -1,0 +1,10 @@
+﻿@* ============================================================================
+   _ViewImports: usings y Tag Helpers compartidos por TODAS las vistas Razor.
+   Gracias a esto, cada vista puede usar BibliotecaApp.Models (Libro, Prestamo...),
+   BibliotecaApp.ViewModels (AutorIndexViewModel, etc.) y los Tag Helpers de ASP.NET
+   sin declarar @using en cada archivo.
+   ============================================================================ *@
+@using BibliotecaApp
+@using BibliotecaApp.Models
+@using BibliotecaApp.ViewModels
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers

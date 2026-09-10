@@ -1,0 +1,68 @@
+@* ============================================================================
+   Vista: Autores / Details
+   Detalle de un autor: nacionalidad, fecha de nacimiento y los títulos
+   de sus libros (modelo: AutorDetalleViewModel).
+   ============================================================================ *@
+@model AutorDetalleViewModel
+
+@{
+    ViewData["Title"] = "Detalles del Autor";
+}
+
+<div class="page-header">
+    <div>
+        <h1><span class="header-icon">👤</span>Detalles del Autor</h1>
+        <p class="page-subtitle">Información completa del autor seleccionado</p>
+    </div>
+    <a asp-action="Index" class="btn btn-light">&larr; Volver a la lista</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">@Model.Nombre</h2>
+                <span class="badge badge-soft-info">@Model.TotalLibros libro(s) registrados</span>
+            </div>
+            <div class="panel-body">
+                <dl class="row detail-card mb-0">
+                    <dt class="col-sm-4">Nacionalidad</dt>
+                    <dd class="col-sm-8">@Model.Nacionalidad</dd>
+
+                    <dt class="col-sm-4">Fecha de Nacimiento</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.FechaNacimiento.HasValue)
+                        {
+                            @Model.FechaNacimiento.Value.ToString("dd/MM/yyyy")
+                        }
+                        else
+                        {
+                            <span class="text-muted">No registrada</span>
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Libros</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.TitulosLibros.Any())
+                        {
+                            <ul class="list-unstyled mb-0">
+                                @foreach (var titulo in Model.TitulosLibros)
+                                {
+                                    <li class="mb-1">📖 @titulo</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span class="text-muted">No tiene libros registrados</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+            <div class="panel-body pt-0 d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+                <a asp-action="Index" class="btn btn-light">Volver a la lista</a>
+            </div>
+        </div>
+    </div>
+</div>

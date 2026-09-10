@@ -1,0 +1,62 @@
+@* ============================================================================
+   Vista: Libros / Delete
+   Confirmación de borrado. Si el libro tiene préstamos asociados avisa que
+   se eliminarán en cascada configurada en el DbContext.
+   ============================================================================ *@
+@model Libro
+
+@{
+    ViewData["Title"] = "Eliminar Libro";
+    var tienePrestamos = Model.Prestamos.Any();
+}
+
+<div class="page-header">
+    <div>
+        <h1><span class="header-icon">🗑️</span>Eliminar Libro</h1>
+        <p class="page-subtitle">Confirma la eliminación del libro seleccionado</p>
+    </div>
+    <a asp-action="Index" class="btn btn-light">&larr; Volver a la lista</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="alert alert-danger d-flex gap-3 align-items-start" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1" viewBox="0 0 16 16">
+                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+            </svg>
+            <div>
+                <strong>Advertencia:</strong> Esta acción <strong>no se puede deshacer</strong>.
+                @if (tienePrestamos)
+                {
+                    <span>El libro tiene préstamos asociados que también se eliminarán en cascada.</span>
+                }
+            </div>
+        </div>
+
+        <div class="panel border-danger">
+            <div class="panel-body">
+                <dl class="row detail-card mb-4">
+                    <dt class="col-sm-4">Título</dt>
+                    <dd class="col-sm-8">@Model.Titulo</dd>
+
+                    <dt class="col-sm-4">ISBN</dt>
+                    <dd class="col-sm-8">@Model.ISBN</dd>
+
+                    <dt class="col-sm-4">Año de Publicación</dt>
+                    <dd class="col-sm-8"><span class="badge badge-soft-secondary">@Model.AnioPublicacion</span></dd>
+
+                    <dt class="col-sm-4">Autor</dt>
+                    <dd class="col-sm-8"><span class="badge badge-soft-info">@(Model.Autor?.Nombre ?? "Sin autor")</span></dd>
+                </dl>
+
+                <form asp-action="Delete">
+                    <input type="hidden" asp-for="Id" />
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-danger flex-fill">Sí, Eliminar</button>
+                        <a asp-action="Index" class="btn btn-light">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

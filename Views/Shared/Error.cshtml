@@ -1,0 +1,35 @@
+﻿@* ============================================================================
+   Vista: Shared / Error
+   Página global de error. Muestra el RequestId para diagnóstico. Se activa en
+   producción mediante app.UseExceptionHandler("/Home/Error") en Program.cs.
+   ============================================================================ *@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="panel text-center border-danger">
+            <div class="panel-body py-5">
+                <div class="empty-icon">⚠️</div>
+                <h1 class="h3 fw-700 mt-3">Ocurrió un error</h1>
+                <p class="text-muted">Se produjo un error al procesar tu solicitud.</p>
+
+                @if (Model.ShowRequestId)
+                {
+                    <p class="text-muted">
+                        <strong>Request ID:</strong> <code>@Model.RequestId</code>
+                    </p>
+                }
+
+                <p class="small text-muted">Modo desarrollo</p>
+                <p class="text-muted">
+                    Al cambiar el entorno a <strong>Development</strong> se mostrarán
+                    más detalles sobre el error ocurrido.
+                </p>
+                <a asp-controller="Home" asp-action="Index" class="btn btn-primary mt-2">Volver al inicio</a>
+            </div>
+        </div>
+    </div>
+</div>

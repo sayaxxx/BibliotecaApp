@@ -1,0 +1,61 @@
+@* ============================================================================
+   Vista: Autores / Edit
+   Formulario de edición de autor reutilizando CrearEditarAutorViewModel.
+   ============================================================================ *@
+@model CrearEditarAutorViewModel
+
+@{
+    ViewData["Title"] = "Editar Autor";
+}
+
+<div class="page-header">
+    <div>
+        <h1><span class="header-icon">✏️</span>Editar Autor</h1>
+        <p class="page-subtitle">Modifica los datos del autor seleccionado</p>
+    </div>
+    <a asp-action="Index" class="btn btn-light">&larr; Volver a la lista</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Datos del autor</h2>
+            </div>
+            <div class="panel-body">
+                <form asp-action="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Nacionalidad" class="form-label"></label>
+                        <input asp-for="Nacionalidad" class="form-control" />
+                        <span asp-validation-for="Nacionalidad" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="FechaNacimiento" class="form-label"></label>
+                        <input asp-for="FechaNacimiento" class="form-control" type="date" />
+                        <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-warning flex-fill">Guardar Cambios</button>
+                        <a asp-action="Index" class="btn btn-light">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

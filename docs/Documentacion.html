@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Documentación · BibliotecaApp</title>
+<style>
+  :root {
+    --brand-1: #4f46e5;
+    --brand-2: #7c3aed;
+    --brand-3: #9333ea;
+    --brand-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 55%, #9333ea 100%);
+    --brand-soft: #eef2ff;
+    --ink: #1e293b;
+    --ink-soft: #64748b;
+    --bg: #f4f5fb;
+    --card-shadow: 0 10px 30px rgba(79, 70, 229, 0.10);
+    --radius: 16px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+    font-size: 15px;
+  }
+  a { color: var(--brand-1); }
+  a:hover { color: var(--brand-2); }
+
+  /* ---------- Cabecera ---------- */
+  header.nav {
+    background: var(--brand-gradient);
+    color: #fff;
+    padding: 28px 0 52px;
+    box-shadow: 0 6px 24px rgba(79, 70, 229, 0.28);
+  }
+  header.nav .inner, main.inner {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  header.nav h1 { font-size: 1.9rem; font-weight: 800; letter-spacing: 0.3px; }
+  header.nav p { opacity: 0.92; margin-top: 6px; }
+
+  /* ---------- Contenido ---------- */
+  main.inner { padding-top: 8px; padding-bottom: 60px; }
+  .toc {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    padding: 22px 26px;
+    margin: -26px 0 30px;
+    position: relative;
+    z-index: 1;
+  }
+  .toc h2 { font-size: 1.05rem; margin-bottom: 10px; color: var(--ink-soft); }
+  .toc ol {
+    list-style: none;
+    counter-reset: toc;
+    columns: 2;
+    gap: 24px;
+  }
+  .toc li { margin: 4px 0; }
+  .toc a { text-decoration: none; font-weight: 600; }
+
+  section.card {
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: var(--card-shadow);
+    padding: 26px 30px;
+    margin-bottom: 26px;
+  }
+  section.card h2 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid var(--brand-soft);
+    color: var(--brand-2);
+  }
+  section.card h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 20px 0 8px;
+    color: var(--ink);
+  }
+  section.card h3:first-of-type { margin-top: 8px; }
+  p, ul, ol { margin-bottom: 10px; }
+  ul.cap { padding-left: 22px; }
+  ul.cap li { margin: 3px 0; }
+
+  /* ---------- Bloques de código / tablas ---------- */
+  pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    overflow-x: auto;
+    font-family: "Cascadia Code", Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    margin: 10px 0 16px;
+  }
+  pre .c { color: #94a3b8; font-style: italic; }
+  pre .k { color: #c4b5fd; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 18px;
+    font-size: 0.9rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 9px 12px;
+    border-bottom: 1px solid #e2e8f0;
+    vertical-align: top;
+  }
+  th { background: var(--brand-soft); color: var(--brand-2); font-weight: 700; }
+  tr:hover td { background: #fafaff; }
+
+  code.hli {
+    background: var(--brand-soft);
+    color: var(--brand-2);
+    border-radius: 6px;
+    padding: 1px 7px;
+    font-size: 0.85em;
+    font-family: "Cascadia Code", Consolas, monospace;
+  }
+
+  .tag { color: #9340ff; }
+  .dt {
+    background: #f1f5f9;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+  }
+  .badge {
+    display: inline-block;
+    background: var(--brand-soft);
+    color: var(--brand-2);
+    border-radius: 999px;
+    padding: 2px 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .badge.green { background: #d1fae5; color: #047857; }
+  .badge.red { background: #fee2e2; color: #b91c1c; }
+  .badge.amber { background: #fef3c7; color: #b45309; }
+
+  .note {
+    background: #fffbeb;
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 0.9rem;
+  }
+  .info {
+    background: var(--brand-soft);
+    border-left: 4px solid var(--brand-1);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 0.9rem;
+  }
+
+  /* ---------- Diagrama de relaciones ---------- */
+  .er {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 16px 0;
+  }
+  .ent {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 12px;
+    min-width: 210px;
+    box-shadow: var(--card-shadow);
+  }
+  .ent .ent-head {
+    background: var(--brand-gradient);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 12px 12px 0 0;
+    font-weight: 700;
+    text-align: center;
+  }
+  .ent ul { list-style: none; padding: 10px 14px; font-size: 0.82rem; }
+  .ent li { padding: 2px 0; color: #cbd5e1; }
+  .ent li strong { color: #fff; font-weight: 600; }
+  .arrow { display: flex; align-items: center; color: var(--brand-2); font-weight: 800; }
+
+  footer {
+    text-align: center;
+    color: var(--ink-soft);
+    padding: 20px;
+    font-size: 0.85rem;
+  }
+  .methods { margin-top: 6px; }
+  @media (max-width: 720px) {
+    .toc ol { columns: 1; }
+    .er { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="inner">
+    <h1>📚 BibliotecaApp — Documentación</h1>
+    <p>Aplicación ASP.NET Core MVC (.NET 10) de gestión bibliotecaria: autores, libros y préstamos.</p>
+  </div>
+</header>
+
+<main class="inner">
+
+  <!-- ================= Índice ================= -->
+  <div class="toc">
+    <h2>Índice de contenido</h2>
+    <ol>
+      <li><a href="#resumen">1 · Resumen</a></li>
+      <li><a href="#ejecutar">2 · Requisitos y ejecución</a></li>
+      <li><a href="#estructura">3 · Estructura del proyecto</a></li>
+      <li><a href="#modelos">4 · Modelos y base de datos</a></li>
+      <li><a href="#arquitectura">5 · Arquitectura en capas (guías HMTL 1–4)</a></li>
+      <li><a href="#servicios">6 · Capa de servicios (Autores)</a></li>
+      <li><a href="#controladores">7 · Controladores y rutas</a></li>
+      <li><a href="#vistas">8 · Vistas y filtros</a></li>
+      <li><a href="#frontend">9 · Frontend</a></li>
+      <li><a href="#seed">10 · Migración y datos de ejemplo</a></li>
+    </ol>
+  </div>
+
+  <!-- ================= 1. Resumen ================= -->
+  <section class="card" id="resumen">
+    <h2>1 · Resumen</h2>
+    <p>
+      <strong>BibliotecaApp</strong> es una aplicación web MVC construida con <strong>ASP.NET Core (.NET 10)</strong>,
+      <strong>Entity Framework Core</strong> y <strong>SQL Server LocalDB</strong>. Permite administrar:
+    </p>
+    <ul class="cap">
+      <li><strong>Autores</strong> — catálogo con búsqueda por nombre, alta/edición/borrado (módulo refactorizado con ViewModels + servicios).</li>
+      <li><strong>Libros</strong> — catálogo con filtro por disponibilidad (Disponible / Prestado).</li>
+      <li><strong>Préstamos</strong> — seguimiento con filtro por estado (No devueltos / Devueltos).</li>
+    </ul>
+    <h3>Convenciones clave</h3>
+    <ul class="cap">
+      <li>Un préstamo está <span class="badge red">activo / No devuelto</span> cuando su <code class="hli">FechaDevolucion</code> es <code class="hli">NULL</code>.</li>
+      <li>Está <span class="badge green">devuelto</span> cuando tiene la fecha de devolución registrada.</li>
+      <li>Un libro está <span class="badge red">Prestado</span> si existe algún préstamo activo sobre él.</li>
+    </ul>
+  </section>
+
+  <!-- ================= 2. Ejecución ================= -->
+  <section class="card" id="ejecutar">
+    <h2>2 · Requisitos y ejecución</h2>
+    <table>
+      <tr><th>Requisito</th><th>Versión / Nota</th></tr>
+      <tr><td>SDK de .NET</td><td>.NET 10 (net10.0) — incluye las plantillas de ASP.NET Core MVC</td></tr>
+      <tr><td>SQL Server</td><td>Edición LocalDB de SQL Server 2016+ (<code class="hli">(localdb)\mssqllocaldb</code>)</td></tr>
+      <tr><td>Navegador</td><td>Cualquier navegador moderno (Chrome, Edge, Firefox)</td></tr>
+    </table>
+    <p>Para arrancar la aplicación desde la carpeta del proyecto:</p>
+    <pre><code><span class="c"># Restaurar dependencias y compilar</span>
+dotnet build
+
+<span class="c"># Ejecutar la aplicación (Launch Settings: http profile)</span>
+dotnet run</code></pre>
+    <p>La app queda disponible en <code class="hli">http://localhost:5217</code>. Al primer arranque, la aplicación:</p>
+    <ol>
+      <li>Conecta con SQL Server LocalDB usando la cadena de <code class="hli">appsettings.json → ConnectionStrings:DefaultConnection</code>.</li>
+      <li>Crea la base física <code class="hli">BibliotecaAppDb.mdf</code> dentro de <code class="hli">App_Data\</code> (AttachDbFilename).</li>
+      <li>Aplica las migraciones (<code class="hli">Database.MigrateAsync()</code>) y siembra datos de ejemplo (<code class="hli">DbSeeder</code>).</li>
+    </ol>
+
+    <div class="info">
+      <strong>Nota sobre la base de datos:</strong> la aplicación usa una base <strong>nueva</strong> (<code class="hli">BibliotecaAppDb</code>) para no alterar el esquema
+      de la base heredada <code class="hli">BibliotecaDb</code> que contenía tablas de un proyecto anterior (Paises, Usuarios, Ejemplares, LibroAutores, etc.).
+    </div>
+
+    <pre><code><span class="k">ConnectionStrings:DefaultConnection</span>
+Server=(localdb)\mssqllocaldb;Database=BibliotecaAppDb;Trusted_Connection=true;
+AttachDbFilename=C:\Users\hipho\Downloads\BibliotecaApp\App_Data\BibliotecaAppDb.mdf</code></pre>
+  </section>
+
+  <!-- ================= 3. Estructura ================= -->
+  <section class="card" id="estructura">
+    <h2>3 · Estructura del proyecto</h2>
+    <pre><code>BibliotecaApp/
+|-- Controllers/            <span class="c"># Controladores MVC</span>
+|   |-- HomeController.cs       Equivalentes Index / Privacy / Error
+|   |-- AutoresController.cs    Módulo refactorizado (usa servicios)
+|   |-- LibrosController.cs     Módulo catálogo + filtro de estado
+|   |-- PrestamosController.cs  Módulo préstamos + filtro de estado
+|-- Models/                 <span class="c"># Entidades de dominio + ErrorViewModel</span>
+|   |-- Autor.cs
+|   |-- Libro.cs
+|   |-- Prestamo.cs
+|   |-- ErrorViewModel.cs
+|-- ViewModels/             <span class="c"># Modelos de vista (módulo Autores)</span>
+|   |-- CrearEditarAutorViewModel.cs
+|   |-- AutorIndexViewModel.cs
+|   |-- AutorDetalleViewModel.cs
+|   |-- AutorDeleteViewModel.cs
+|-- Services/               <span class="c"># Capa de servicios (lógica de negocio)</span>
+|   |-- IAutorService.cs
+|   |-- AutorService.cs
+|-- Data/                   <span class="c"># Capa de acceso a datos</span>
+|   |-- ApplicationDbContext.cs
+|   |-- DbSeeder.cs
+|-- Migrations/             <span class="c"># Migraciones EF Core</span>
+|   |-- 20260907120907_InitialCreate.cs
+|-- Views/                  <span class="c"># Vistas Razor por controlador</span>
+|   |-- Home/  Autores/  Libros/  Prestamos/  Shared/
+|-- wwwroot/                <span class="c"># Estáticos: css/site.css, lib/, js/</span>
+|-- appsettings.json        <span class="c"># Cadena de conexión y configuración</span>
+|-- Program.cs              <span class="c"># Punto de entrada (host, DI, middleware)</span>
+|-- BibliotecaApp.csproj    <span class="c"># Archivo del proyecto</span></code></pre>
+  </section>
+
+  <!-- ================= 4. Modelos ================= -->
+  <section class="card" id="modelos">
+    <h2>4 · Modelos y base de datos</h2>
+    <p>Tres entidades de dominio ubicadas en <code class="hli">Models/</code>. Se mapean a tablas SQL Server con las convenciones y configuraciones de EF Core:</p>
+
+    <div class="er">
+      <div class="ent">
+        <div class="ent-head">Autor</div>
+        <ul>
+          <li><strong>Id</strong> (PK, identity)</li>
+          <li><strong>Nombre</strong> string</li>
+          <li><strong>Nacionalidad</strong> string</li>
+          <li><strong>FechaNacimiento</strong> date</li>
+          <li><strong>Libros</strong> → ICollection&lt;Libro&gt;</li>
+        </ul>
+      </div>
+      <div class="arrow">1 ── N</div>
+      <div class="ent">
+        <div class="ent-head">Libro</div>
+        <ul>
+          <li><strong>Id</strong> (PK, identity)</li>
+          <li><strong>Titulo</strong> string</li>
+          <li><strong>ISBN</strong> string</li>
+          <li><strong>AnioPublicacion</strong> int</li>
+          <li><strong>AutorId</strong> (FK → Autor) <span class="tag">cascada</span></li>
+          <li><strong>Prestamos</strong> → ICollection&lt;Prestamo&gt;</li>
+        </ul>
+      </div>
+      <div class="arrow">1 ── N</div>
+      <div class="ent">
+        <div class="ent-head">Prestamo</div>
+        <ul>
+          <li><strong>Id</strong> (PK, identity)</li>
+          <li><strong>NombreUsuario</strong> string</li>
+          <li><strong>FechaPrestamo</strong> date</li>
+          <li><strong>FechaDevolucion</strong> date <span class="tag">nullable</span></li>
+          <li><strong>LibroId</strong> (FK → Libro) <span class="tag">cascada</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Comportamiento de borrado (ApplicationDbContext)</h3>
+    <p>El borrado en cascada está configurado explícitamente:</p>
+    <table>
+      <tr><th>Relación</th><th>FK</th><th>Eliminar el padre</th></tr>
+      <tr><td>Libro → Autor (N:1)</td><td><code class="hli">Libro.AutorId</code></td><td>Borra sus libros</td></tr>
+      <tr><td>Prestamo → Libro (N:1)</td><td><code class="hli">Prestamo.LibroId</code></td><td>Borra sus préstamos</td></tr>
+    </table>
+    <div class="note">
+      Al eliminar un <strong>autor</strong> se borran sus libros y, a su vez, los préstamos de esos libros.
+      Las vistas Delete advierten al usuario de este efecto.
+    </div>
+  </section>
+
+  <!-- ================= 5. Arquitectura ================= -->
+  <section class="card" id="arquitectura">
+    <h2>5 · Arquitectura en capas (guías HMTL 1–4)</h2>
+    <p>
+      El módulo <strong>Autores</strong> fue refactorizado para cumplir los requisitos de las guías 1.html–4.html,
+      separando las responsabilidades en tres capas claras:
+    </p>
+    <table>
+      <tr><th>Capa</th><th>Responsabilidad</th><th>Componentes</th></tr>
+      <tr>
+        <td><strong>Presentación</strong></td>
+        <td>Vistas Razor y controladores. Nunca accede a EF directamente.</td>
+        <td><code class="hli">AutoresController</code>, <code class="hli">Views/Autores/*</code></td>
+      </tr>
+      <tr>
+        <td><strong>Lógica de negocio / Servicios</strong></td>
+        <td>Reglas del dominio: CRUD de autores, mapeo modelo → ViewModel.</td>
+        <td><code class="hli">IAutorService</code>, <code class="hli">AutorService</code></td>
+      </tr>
+      <tr>
+        <td><strong>Datos</strong></td>
+        <td>Acceso a SQL Server con Entity Framework Core.</td>
+        <td><code class="hli">ApplicationDbContext</code>, <code class="hli">DbSeeder</code></td>
+      </tr>
+    </table>
+    <p>
+      El controlador <strong>solo depende de la interfaz</strong> <code class="hli">IAutorService</code>, que se registra en
+      <code class="hli">Program.cs</code> con ciclo de vida <em>Scoped</em>. Esto permite probar el módulo con mocks y
+      cambiar la implementación sin tocar el controlador.
+    </p>
+    <pre><code><span class="k">Program.cs</span>
+builder.Services.AddScoped&lt;IAutorService, AutorService&gt;();</code></pre>
+  </section>
+
+  <!-- ================= 6. Servicios ================= -->
+  <section class="card" id="servicios">
+    <h2>6 · Capa de servicios (Autores)</h2>
+    <table>
+      <tr><th>Método (IAutorService)</th><th>Descripción</th><th>Devuelve</th></tr>
+      <tr><td><code class="hli">ObtenerTodosAsync(buscar)</code></td><td>Lista de autores con filtro opcional por nombre y total de libros.</td><td>IEnumerable&lt;AutorIndexViewModel&gt;</td></tr>
+      <tr><td><code class="hli">ObtenerDetalleAsync(id)</code></td><td>Detalle del autor con los títulos de sus libros.</td><td>AutorDetalleViewModel?</td></tr>
+      <tr><td><code class="hli">ObtenerViewModelParaEditarAsync(id)</code></td><td>Datos actuales para precargar el formulario de edición.</td><td>CrearEditarAutorViewModel?</td></tr>
+      <tr><td><code class="hli">ActualizarAutorAsync(id, vm)</code></td><td>Actualiza solo los campos permitidos del formulario.</td><td>bool (false si no existe)</td></tr>
+      <tr><td><code class="hli">CrearAutorAsync(vm)</code></td><td>Crea un autor nuevo a partir del ViewModel.</td><td>bool</td></tr>
+      <tr><td><code class="hli">ObtenerParaEliminarAsync(id)</code></td><td>Datos de la pantalla de confirmación (incluye nº de libros).</td><td>AutorDeleteViewModel?</td></tr>
+      <tr><td><code class="hli">EliminarAutorAsync(id)</code></td><td>Borra el autor (sus libros se borran en cascada).</td><td>bool (false si no existe)</td></tr>
+    </table>
+    <p>
+      Todos los métodos <strong>mapean la entidad <code class="hli">Autor</code> a un ViewModel</strong>, de modo que la capa de
+      presentación nunca maneja el modelo de dominio completo.
+    </p>
+  </section>
+
+  <!-- ================= 7. Controladores ================= -->
+  <section class="card" id="controladores">
+    <h2>7 · Controladores y rutas</h2>
+    <p>Ruta por defecto configurada en <code class="hli">Program.cs</code>: <code class="hli">{controller=Home}/{action=Index}/{id?}</code>.</p>
+    <table>
+      <tr><th>Controlador</th><th>Acciones principales</th><th>Ruta</th></tr>
+      <tr>
+        <td><strong>HomeController</strong></td>
+        <td>Index (dashboard con stats), Privacy, Error</td>
+        <td><code class="hli">/</code>, <code class="hli">/Home/Privacy</code></td>
+      </tr>
+      <tr>
+        <td><strong>AutoresController</strong></td>
+        <td>Index(?buscar), Details, Create, Edit, Delete</td>
+        <td><code class="hli">/Autores</code>, <code class="hli">/Autores/Create</code>, …</td>
+      </tr>
+      <tr>
+        <td><strong>LibrosController</strong></td>
+        <td>Index(?estado), Details, Create, Edit, Delete</td>
+        <td><code class="hli">/Libros</code>, <code class="hli">/Libros/Create</code>, …</td>
+      </tr>
+      <tr>
+        <td><strong>PrestamosController</strong></td>
+        <td>Index(?estado), Details, Create, Edit, Delete</td>
+        <td><code class="hli">/Prestamos</code>, <code class="hli">/Prestamos/Create</code>, …</td>
+      </tr>
+    </table>
+    <h3>Manejo de errores</h3>
+    <p>
+      En producción se registra <code class="hli">app.UseExceptionHandler("/Home/Error")</code>: las excepciones no controladas
+      redirigen a la vista <code class="hli">Shared/Error.cshtml</code>, que muestra el <code class="hli">RequestId</code> de diagnóstico.
+    </p>
+  </section>
+
+  <!-- ================= 8. Vistas y filtros ================= -->
+  <section class="card" id="vistas">
+    <h2>8 · Vistas y filtros</h2>
+    <p>
+      Todas las vistas están bajo <code class="hli">Views/&lt;Controlador&gt;/</code> y usan el layout compartido
+      <code class="hli">Views/Shared/_Layout.cshtml</code>. Los formularios de alta/edición cargan la validación
+      cliente con la parcial <code class="hli">_ValidationScriptsPartial</code>.
+    </p>
+
+    <h3>8.1 · Filtro de libros por estado (Libros/Index)</h3>
+    <p>
+      Un combobox envía por GET el parámetro <code class="hli">estado</code> con tres opciones:
+      <span class="badge">Todos</span> <span class="badge green">disponible</span> <span class="badge red">prestado</span>.
+      La consulta se filtra con LINQ en el controlador:
+    </p>
+    <pre><code><span class="k">LibrosController.Index(string? estado)</span>
+<span class="c">// "disponible" => libros sin ningún préstamo activo (FechaDevolucion NULL)</span>
+libros = libros.Where(l =&gt; !l.Prestamos.Any(p =&gt; p.FechaDevolucion == null));
+
+<span class="c">// "prestado"  => libros con al menos un préstamo activo</span>
+libros = libros.Where(l =&gt; l.Prestamos.Any(p =&gt; p.FechaDevolucion == null));</code></pre>
+    <p>La opción elegida se conserva mediante <code class="hli">ViewData["Estado"]</code>.</p>
+
+    <h3>8.2 · Filtro de préstamos por estado (Prestamos/Index)</h3>
+    <p>
+      Mismo patrón que el filtro de libros. Las opciones son:
+      <span class="badge">Todos</span> <span class="badge red">pendiente (No devueltos)</span> <span class="badge green">devuelto (Devueltos)</span>.
+    </p>
+    <pre><code><span class="k">PrestamosController.Index(string? estado)</span>
+<span class="c">// "pendiente" => sin fecha de devolución registrada (NULL)</span>
+prestamos = prestamos.Where(p =&gt; p.FechaDevolucion == null);
+
+<span class="c">// "devuelto"  => con fecha de devolución registrada</span>
+prestamos = prestamos.Where(p =&gt; p.FechaDevolucion != null);</code></pre>
+
+    <h3>8.3 · Búsqueda de autores por nombre (Autores/Index)</h3>
+    <p>Un cuadro de texto envía por GET el parámetro <code class="hli">buscar</code>; el servicio filtra con <code class="hli">Nombre.Contains(buscar)</code> (equivale a un LIKE en SQL).</p>
+  </section>
+
+  <!-- ================= 9. Frontend ================= -->
+  <section class="card" id="frontend">
+    <h2>9 · Frontend</h2>
+    <table>
+      <tr><th>Recurso</th><th>Descripción</th></tr>
+      <tr>
+        <td><code class="hli">wwwroot/css/site.css</code></td>
+        <td>Tema moderno con variables CSS: gradiente de marca, paneles (.<code class="dt">panel</code>),
+            tabla moderna (.<code class="dt">table-modern</code>), badges suaves (.<code class="dt">badge-soft-*</code>),
+            tarjetas de estadísticas (.<code class="dt">stat-card</code>), hero y accesos rápidos.</td>
+      </tr>
+      <tr>
+        <td><code class="hli">Views/Shared/_Layout.cshtml</code></td>
+        <td>Navbar con gradiente que marca el enlace activo según el controlador, main container y footer fijo.</td>
+      </tr>
+      <tr>
+        <td><code class="hli">lib/bootstrap</code>, <code class="dt">jquery</code></td>
+        <td>Librerías de bootstrap para el layout responsive y jQuery para la validación de formularios.</td>
+      </tr>
+    </table>
+  </section>
+
+  <!-- ================= 10. Migración y seed ================= -->
+  <section class="card" id="seed">
+    <h2>10 · Migración y datos de ejemplo</h2>
+    <h3>Migración</h3>
+    <p>
+      El esquema lo genera la migración <code class="hli">20260907120907_InitialCreate</code> (crea <code class="dt">Autores</code>,
+      <code class="dt">Libros</code> y <code class="dt">Prestamos</code>). En <code class="hli">Program.cs</code> se aplica automáticamente
+      al arrancar mediante <code class="hli">Database.MigrateAsync()</code>, así la base nueva se crea sola sin pasos manuales.
+    </p>
+    <h3>Datos de ejemplo (DbSeeder)</h3>
+    <p><code class="hli">DbSeeder.SeedAsync</code> es <strong>idempotente</strong>: si ya existe algún autor, no hace nada. La primera vez inserta:</p>
+    <ul class="cap">
+      <li>3 autores: Gabriel García Márquez, Mario Vargas Llosa y Jorge Luis Borges.</li>
+      <li>4 libros: Cien Años de Soledad, El Amor en los Tiempos del Cólera, La Ciudad y los Perros, Ficciones.</li>
+      <li>3 préstamos de ejemplo (2 sin devolver y 1 devuelto) para poder probar el filtro de Préstamos.</li>
+    </ul>
+
+    <div class="info">
+      <strong>Base de datos:</strong> el fichero <code class="hli">BibliotecaAppDb.mdf</code> se guarda en
+      <code class="hli">App_Data\</code> dentro del proyecto. La base heredada <code class="hli">BibliotecaDb</code>
+      (de un esquema anterior) no se modifica.
+    </div>
+  </section>
+
+</main>
+
+<footer>Documentación generada para el proyecto BibliotecaApp · ASP.NET Core MVC .NET 10</footer>
+
+</body>
+</html>

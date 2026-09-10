@@ -1,0 +1,26 @@
+﻿@* ============================================================================
+   Parcial: _ValidationScriptsPartial
+   Carga la validación de jQuery del lado del cliente (jquery.validate) junto
+   con el adaptador unobtrusive de ASP.NET. Se incluye al final de los
+   formularios Create/Edit mediante @section Scripts.
+   Además registra la regla personalizada "fechanoanterior" (día >= hoy) usada
+   por el atributo FechaNoAnteriorHoyAttribute del modelo Prestamo.
+   ============================================================================ *@
+<script src="~/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+<script src="~/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
+<script>
+    // Regla de cliente: la fecha no puede ser anterior al día actual.
+    // Compara la parte de fecha ("yyyy-MM-dd") sin depender de la zona horaria.
+    $.validator.addMethod("fechanoanterior", function (value, element) {
+        if (!value) {
+            return true; // vacío = válido (p. ej. devolución pendiente)
+        }
+        var partes = value.split("-");
+        var fecha = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+        var hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+        return fecha >= hoy;
+    }, "La fecha no puede ser anterior a la fecha actual");
+    // Conecta la regla con los metadatos data-val-fechanoanterior.
+    $.validator.unobtrusive.adapters.addBool("fechanoanterior");
+</script>

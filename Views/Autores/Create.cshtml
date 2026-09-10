@@ -1,0 +1,62 @@
+@* ============================================================================
+   Vista: Autores / Create
+   Formulario de alta de autor. Valida un CrearEditarAutorViewModel (no el
+   modelo de dominio) usando las DataAnnotations del ViewModel.
+   ============================================================================ *@
+@model CrearEditarAutorViewModel
+
+@{
+    ViewData["Title"] = "Crear Autor";
+}
+
+<div class="page-header">
+    <div>
+        <h1><span class="header-icon">➕</span>Crear Nuevo Autor</h1>
+        <p class="page-subtitle">Registra un nuevo autor en el catálogo</p>
+    </div>
+    <a asp-action="Index" class="btn btn-light">&larr; Volver a la lista</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Datos del autor</h2>
+            </div>
+            <div class="panel-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Nombre" class="form-label"></label>
+                        <input asp-for="Nombre" class="form-control" placeholder="Ej: Gabriel García Márquez" />
+                        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Nacionalidad" class="form-label"></label>
+                        <input asp-for="Nacionalidad" class="form-control" placeholder="Ej: Colombiano" />
+                        <span asp-validation-for="Nacionalidad" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="FechaNacimiento" class="form-label"></label>
+                        <input asp-for="FechaNacimiento" class="form-control" type="date" />
+                        <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">Crear Autor</button>
+                        <a asp-action="Index" class="btn btn-light">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,56 @@
+@* ============================================================================
+   Vista: Libros / Details
+   Detalle de un libro. Muestra un badge "Prestado"/"Disponible" según si
+   existe un préstamo activo (FechaDevolucion NULL) en su historial.
+   ============================================================================ *@
+@model Libro
+
+@{
+    ViewData["Title"] = "Detalles del Libro";
+    var prestado = Model.Prestamos.Any(p => p.FechaDevolucion == null);
+}
+
+<div class="page-header">
+    <div>
+        <h1><span class="header-icon">📖</span>Detalles del Libro</h1>
+        <p class="page-subtitle">Información completa del libro seleccionado</p>
+    </div>
+    <a asp-action="Index" class="btn btn-light">&larr; Volver a la lista</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-7">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">@Model.Titulo</h2>
+                @if (prestado)
+                {
+                    <span class="badge badge-soft-danger">Prestado</span>
+                }
+                else
+                {
+                    <span class="badge badge-soft-success">Disponible</span>
+                }
+            </div>
+            <div class="panel-body">
+                <dl class="row detail-card mb-0">
+                    <dt class="col-sm-4">Título</dt>
+                    <dd class="col-sm-8">@Model.Titulo</dd>
+
+                    <dt class="col-sm-4">ISBN</dt>
+                    <dd class="col-sm-8">@Model.ISBN</dd>
+
+                    <dt class="col-sm-4">Año de Publicación</dt>
+                    <dd class="col-sm-8"><span class="badge badge-soft-secondary">@Model.AnioPublicacion</span></dd>
+
+                    <dt class="col-sm-4">Autor</dt>
+                    <dd class="col-sm-8"><span class="badge badge-soft-info">@(Model.Autor?.Nombre ?? "Sin autor")</span></dd>
+                </dl>
+            </div>
+            <div class="panel-body pt-0 d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Editar</a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Eliminar</a>
+            </div>
+        </div>
+    </div>
+</div>

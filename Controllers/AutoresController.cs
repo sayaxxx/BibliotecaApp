@@ -5,15 +5,21 @@
 //  capa de servicios (IAutorService) y ViewModels en lugar de usar DbContext
 //  directamente, siguiendo los requisitos de las guías HMTL 1..4.
 //
+//  Seguridad (ASP.NET Core Identity):
+//      - Index y Details : cualquier usuario autenticado.
+//      - Create/Edit/Delete : solo Admin y Bibliotecario.
+//
 //  Inyección de dependencias: el contenedor registra IAutorService -> AutorService
 //  en Program.cs, y el framework lo inyecta en este constructor.
 // ============================================================================
 using BibliotecaApp.Services;
 using BibliotecaApp.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BibliotecaApp.Controllers
 {
+    [Authorize]
     public class AutoresController : Controller
     {
         // Servicio de lógica de negocio del módulo de autores (inyectado por DI).
@@ -65,7 +71,9 @@ namespace BibliotecaApp.Controllers
         /// <summary>
         /// GET: Autores/Create — Formulario de alta. Se entrega un ViewModel
         /// vacío para que la vista valide sobre él (no sobre el modelo).
+        /// Solo Admin y Bibliotecario.
         /// </summary>
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public IActionResult Create()
         {
             var viewModel = new CrearEditarAutorViewModel();
@@ -78,6 +86,7 @@ namespace BibliotecaApp.Controllers
         /// <param name="viewModel">Datos validados del formulario.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Create(
             CrearEditarAutorViewModel viewModel)
         {
@@ -90,10 +99,11 @@ namespace BibliotecaApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        /// <summary>
+/// <summary>
         /// GET: Autores/Edit/{id} — Precarga el formulario con los datos actuales.
+        /// Solo Admin y Bibliotecario.
         /// </summary>
-        /// <param name="id">Identificador del autor a editar.</param>
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -119,6 +129,7 @@ namespace BibliotecaApp.Controllers
         /// <param name="viewModel">Datos validados del formulario.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Edit(int id,
             CrearEditarAutorViewModel viewModel)
         {
@@ -139,10 +150,11 @@ namespace BibliotecaApp.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        /// <summary>
+/// <summary>
         /// GET: Autores/Delete/{id} — Página de confirmación del borrado.
+        /// Solo Admin y Bibliotecario.
         /// </summary>
-        /// <param name="id">Identificador del autor a eliminar.</param>
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -168,6 +180,7 @@ namespace BibliotecaApp.Controllers
         /// <param name="id">Identificador del autor a eliminar.</param>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> DeleteConfirmed(
             int id)
         {

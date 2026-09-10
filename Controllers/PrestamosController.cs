@@ -2,13 +2,19 @@
 //  PrestamosController : controlador del módulo "Préstamos"
 // ----------------------------------------------------------------------------
 //  Gestiona el ciclo de vida de los préstamos de la biblioteca:
-//      - Index   : listado con filtro por estado (No devueltos / Devueltos)
-//      - Details : detalle de un préstamo concreto
-//      - Create  : alta de un nuevo préstamo
-//      - Edit    : modificación (p. ej. registrar la fecha de devolución)
-//      - Delete  : eliminación con confirmación
-//  Accede a la base de datos a través de ApplicationDbContext (Entity Framework).
+//      - Index         : listado completo con filtro por estado
+//      - Prestar       : registrar un nuevo préstamo (fecha automática = hoy)
+//      - Devolver      : registrar la devolución (fecha automática = hoy)
+//      - Create/Edit/Delete : gestión CRUD completa
+//      - MisPrestamos  : consulta EXCLUSIVA de los préstamos del usuario
+//                        autenticado (acción pensada para el rol Lector).
+//
+//  Seguridad (ASP.NET Core Identity):
+//      - Index/Details/Create/Edit/Delete/Prestar/Devolver : Admin y Bibliotecario.
+//      - MisPrestamos : cualquier usuario autenticado (filtrado por LectorId).
 // ============================================================================
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -30,10 +36,10 @@ namespace BibliotecaApp.Controllers
         /// <summary>
         /// Muestra el listado de préstamos. Admite el filtro por estado:
         /// "pendiente" (préstamos no devueltos) y "devuelto" (ya devueltos).
-        /// Si el parámetro llega vacío o nulo, se muestran todos.
+        /// Solo Admin y Bibliotecario.
         /// </summary>
         /// <param name="estado">Valor seleccionado en el combobox de filtro.</param>
-        /// <returns>Vista Index con la colección de préstamos filtrada.</returns>
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Index(string? estado)
         {
             // 1. Iniciamos la consulta LINQ incluyendo el libro asociado a cada préstamo
@@ -61,10 +67,10 @@ namespace BibliotecaApp.Controllers
         }
 
         /// <summary>
-        /// Muestra los detalles de un préstamo (incluye el libro asociado).
+        /// Detalle de un préstamo (incluye el libro asociado).
+        /// Solo Admin y Bibliotecario.
         /// </summary>
-        /// <param name="id">Identificador del préstamo.</param>
-        /// <returns>Vista Details, o NotFound si el id es inválido o no existe.</returns>
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -79,9 +85,107 @@ namespace BibliotecaApp.Controllers
         }
 
         /// <summary>
-        /// GET: muestra el formulario vacío para registrar un préstamo nuevo.
-        /// Carga los libros disponibles en el desplegable "Libro".
+        /// GET: formula semántico y directo para REGISTRAR un préstamo.
+        /// Solo Admin y Bibliotecario. La fecha de préstamo se fija al día
+        /// actual de forma automática (no se puede marcar una fecha pasada).
         /// </summary>
+        [Authorize(Roles = "Admin,Bibliotecario")]
+        public IActionResult Prestar()
+        {
+            // Desplegables del formulario: libros y usuarios (lectores) con cuenta.
+            ViewData["LibroId"] = new SelectList(_context.Libros.OrderBy(l => l.Titulo), "Id", "Titulo");
+            ViewData["Lectores"] = new SelectList(
+                _context.Users.OrderBy(u => u.Email), "Id", "Email");
+            return View();
+        }
+
+        /// <summary>
+        /// POST: registra el préstamo. FechaPrestamo = hoy, FechaDevolucion = null.
+        /// </summary>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
+        public async Task<IActionResult> Prestar([Bind("Id,NombreUsuario,FechaPrestamo,FechaDevolucion,LibroId,LectorId")] Prestamo prestamo)
+        {
+            // La fecha de préstamo la pone el sistema (hoy): evita fechas pasadas.
+            prestamo.FechaPrestamo = DateTime.Today;
+            prestamo.FechaDevolucion = null;
+            ModelState.Remove("FechaPrestamo");
+
+            if (ModelState.IsValid)
+            {
+                _context.Add(prestamo);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewData["LibroId"] = new SelectList(_context.Libros.OrderBy(l => l.Titulo), "Id", "Titulo", prestamo.LibroId);
+            ViewData["Lectores"] = new SelectList(_context.Users.OrderBy(u => u.Email), "Id", "Email", prestamo.LectorId);
+            return View(prestamo);
+        }
+
+        /// <summary>
+        /// GET: página de confirmación para REGISTRAR una devolución.
+        /// Solo Admin y Bibliotecario.
+        /// </summary>
+        [Authorize(Roles = "Admin,Bibliotecario")]
+        public async Task<IActionResult> Devolver(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var prestamo = await _context.Prestamos
+                .Include(p => p.Libro)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (prestamo == null) return NotFound();
+
+            return View(prestamo);
+        }
+
+        /// <summary>
+        /// POST: registra la devolución poniendo FechaDevolucion = hoy.
+        /// </summary>
+        [HttpPost, ActionName("Devolver")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
+        public async Task<IActionResult> DevolverConfirmed(int id)
+        {
+            var prestamo = await _context.Prestamos.FindAsync(id);
+            if (prestamo == null) return NotFound();
+
+            // La fecha de devolución la pone el sistema (hoy).
+            prestamo.FechaDevolucion = DateTime.Today;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        /// <summary>
+        /// "Mis Préstamos": consulta EXCLUSIVA de los préstamos del Lector
+        /// autenticado, filtrados por su UserId (ClaimTypes.NameIdentifier).
+        /// </summary>
+        [Authorize]
+        public async Task<IActionResult> MisPrestamos()
+        {
+            // Id del usuario actual según la cookie de Identity.
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Solo se devuelven los préstamos cuyo LectorId coincide con el usuario.
+            var prestamos = await _context.Prestamos
+                .Where(p => p.LectorId == userId)
+                .Include(p => p.Libro)
+                .OrderByDescending(p => p.FechaPrestamo)
+                .ToListAsync();
+
+            return View(prestamos);
+        }
+
+        /// <summary>
+        /// GET: muestra el formulario vacío para registrar un préstamo nuevo
+        /// (CRUD clásico). Carga los libros disponibles en el desplegable.
+        /// Solo Admin y Bibliotecario.
+        /// </summary>
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public IActionResult Create()
         {
             ViewData["LibroId"] = new SelectList(_context.Libros, "Id", "Titulo");
@@ -92,9 +196,9 @@ namespace BibliotecaApp.Controllers
         /// POST: recibe los datos del formulario y guarda el nuevo préstamo.
         /// Si la validación falla, vuelve a mostrar el formulario con los errores.
         /// </summary>
-        /// <param name="prestamo">Entidad Prestamo recibida mediante model binding.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Create([Bind("Id,NombreUsuario,FechaPrestamo,FechaDevolucion,LibroId")] Prestamo prestamo)
         {
             if (ModelState.IsValid)
@@ -110,8 +214,9 @@ namespace BibliotecaApp.Controllers
 
         /// <summary>
         /// GET: precarga el formulario de edición con los datos del préstamo.
+        /// Solo Admin y Bibliotecario.
         /// </summary>
-        /// <param name="id">Identificador del préstamo a editar.</param>
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -125,11 +230,11 @@ namespace BibliotecaApp.Controllers
 
         /// <summary>
         /// POST: aplica los cambios del formulario al préstamo existente.
+        /// Solo Admin y Bibliotecario.
         /// </summary>
-        /// <param name="id">Identificador que debe coincidir con prestamo.Id.</param>
-        /// <param name="prestamo">Datos editados recibidos mediante model binding.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,NombreUsuario,FechaPrestamo,FechaDevolucion,LibroId")] Prestamo prestamo)
         {
             if (id != prestamo.Id) return NotFound();
@@ -157,8 +262,9 @@ namespace BibliotecaApp.Controllers
 
         /// <summary>
         /// GET: muestra la página de confirmación antes de eliminar el préstamo.
+        /// Solo Admin y Bibliotecario.
         /// </summary>
-        /// <param name="id">Identificador del préstamo a eliminar.</param>
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -174,11 +280,11 @@ namespace BibliotecaApp.Controllers
 
         /// <summary>
         /// POST: elimina definitivamente el préstamo de la base de datos.
-        /// Se recibe a través de un formulario con antiforgery (ActionName "Delete").
+        /// Solo Admin y Bibliotecario.
         /// </summary>
-        /// <param name="id">Identificador del préstamo a eliminar.</param>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var prestamo = await _context.Prestamos.FindAsync(id);
@@ -192,7 +298,6 @@ namespace BibliotecaApp.Controllers
 
         /// <summary>
         /// Comprueba si existe un préstamo con el id indicado.
-        /// Se usa para distinguir una eliminación concurrente de otros errores.
         /// </summary>
         private bool PrestamoExists(int id)
         {

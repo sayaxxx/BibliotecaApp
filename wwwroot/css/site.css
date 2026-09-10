@@ -103,6 +103,46 @@ body {
   font-size: 1.15rem;
 }
 
+/* ---------- Auth (Login / Registro) ---------- */
+.az-center-page {
+  min-height: 72vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.auth-card {
+  width: 100%;
+  max-width: 430px;
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: 0 20px 45px rgba(79, 70, 229, 0.16);
+  overflow: hidden;
+}
+.auth-head {
+  background: var(--brand-gradient);
+  padding: 26px 26px 78px;
+  text-align: center;
+}
+.auth-icon {
+  display: inline-block;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 1.7rem;
+  line-height: 64px;
+}
+.auth-body {
+  padding: 22px 30px 28px;
+  margin-top: -52px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: #fff;
+}
+@media (max-width: 480px) {
+  .auth-body { padding: 18px 20px 24px; }
+}
+.auth-body .form-label { color: var(--ink); }
+
 /* ---------- Footer ---------- */
 .footer {
   position: absolute;

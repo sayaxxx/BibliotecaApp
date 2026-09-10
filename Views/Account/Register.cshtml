@@ -1,0 +1,64 @@
+@* ============================================================================
+   Vista: Account / Register
+   Alta de nuevas cuentas. Los usuarios creados aquí reciben el rol "Lector"
+   (solo lectura del catálogo y consulta de "Mis Préstamos").
+   ============================================================================ *@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Registrarse";
+}
+
+<div class="az-center-page">
+    <div class="auth-card">
+        <div class="auth-head">
+            <span class="auth-icon">📝</span>
+            <h1 class="h4 fw-700 mt-3 mb-0 text-white">Crear Cuenta</h1>
+        </div>
+        <div class="auth-body">
+            <p class="text-muted text-center mb-4">Crea tu cuenta de lector para consultar el catálogo.</p>
+
+            <form asp-action="Register" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="NombreCompleto" class="form-label"></label>
+                    <input asp-for="NombreCompleto" class="form-control" placeholder="Ej: Ana Torres" autocomplete="name" />
+                    <span asp-validation-for="NombreCompleto" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" placeholder="tu@correo.com" autocomplete="email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" placeholder="••••••••" autocomplete="new-password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                    <div class="form-text">Mínimo 8 caracteres, con mayúscula, número y símbolo.</div>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                    <input asp-for="ConfirmPassword" class="form-control" placeholder="••••••••" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Registrarme</button>
+            </form>
+
+            <hr class="my-4" />
+            <p class="text-center mb-0">
+                ¿Ya tienes cuenta?
+                <a asp-action="Login">Inicia sesión</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,68 @@
+@* ============================================================================
+   Vista: Prestamos / Prestar (registro rápido)
+   Formulario semántico de préstamo: se elige el libro y el usuario (opcional).
+   La FechaPrestamo se fija automáticamente a hoy en el controlador (por eso
+   no aparece: el sistema impide registrar fechas anteriores al día actual).
+   Solo para Admin y Bibliotecario.
+   ============================================================================ *@
+@model Prestamo
+@{
+    ViewData["Title"] = "Registrar Préstamo";
+}
+
+<div class="page-header">
+    <div>
+        <h1><span class="header-icon">📤</span>Registrar Préstamo</h1>
+        <p class="page-subtitle">Entrega un libro. La fecha de préstamo se registra hoy.</p>
+    </div>
+    <a asp-action="Index" class="btn btn-light">&larr; Volver a la lista</a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Entrega del libro</h2>
+            </div>
+            <div class="panel-body">
+                <form asp-action="Prestar" method="post">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="LibroId" class="form-label"></label>
+                        <select asp-for="LibroId" class="form-select" asp-items="ViewBag.LibroId">
+                            <option value="">-- Seleccione un Libro --</option>
+                        </select>
+                        <span asp-validation-for="LibroId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        @* El lector vinculado es opcional; se usa para que el usuario
+                           pueda ver su préstamo en "Mis Préstamos". *@
+                        <label class="form-label">Usuario (lector)</label>
+                        <select name="LectorId" class="form-select" asp-items="ViewBag.Lectores">
+                            <option value="">-- Sin vincular a una cuenta --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="NombreUsuario" class="form-label"></label>
+                        <input asp-for="NombreUsuario" class="form-control" placeholder="Ej: Ana Torres" />
+                        <span asp-validation-for="NombreUsuario" class="text-danger"></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">Registrar Préstamo</button>
+                        <a asp-action="Index" class="btn btn-light">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

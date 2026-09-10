@@ -40,5 +40,16 @@ namespace BibliotecaApp.Models
 
         /// <summary>Libro prestado (navegación N:1).</summary>
         public virtual Libro? Libro { get; set; }
+
+        /// <summary>
+        /// Id (string) del usuario lector que se llevó el libro
+        /// (FK hacia AspNetUsers / ApplicationUser). Es opcional para permitir
+        /// préstamos a personas sin cuenta en el sistema.
+        /// </summary>
+        [Display(Name = "Lector")]
+        public string? LectorId { get; set; }
+
+        /// <summary>Usuario lector asociado al préstamo (navegación N:1).</summary>
+        public virtual ApplicationUser? Lector { get; set; }
     }
 }

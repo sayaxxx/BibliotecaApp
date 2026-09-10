@@ -232,7 +232,8 @@
       <li><a href="#controladores">7 · Controladores y rutas</a></li>
       <li><a href="#vistas">8 · Vistas y filtros</a></li>
       <li><a href="#frontend">9 · Frontend</a></li>
-      <li><a href="#seed">10 · Migración y datos de ejemplo</a></li>
+       <li><a href="#seed">10 · Migración y datos de ejemplo</a></li>
+      <li><a href="#seguridad">11 · Seguridad (ASP.NET Core Identity)</a></li>
     </ol>
   </div>
 
@@ -297,29 +298,34 @@ AttachDbFilename=C:\Users\hipho\Downloads\BibliotecaApp\App_Data\BibliotecaAppDb
 |   |-- AutoresController.cs    Módulo refactorizado (usa servicios)
 |   |-- LibrosController.cs     Módulo catálogo + filtro de estado
 |   |-- PrestamosController.cs  Módulo préstamos + filtro de estado
+|   |-- AccountController.cs    Login, Register, Logout, AccessDenied
 |-- Models/                 <span class="c"># Entidades de dominio + ErrorViewModel</span>
 |   |-- Autor.cs
 |   |-- Libro.cs
 |   |-- Prestamo.cs
+|   |-- ApplicationUser.cs  <span class="c"># Hereda IdentityUser</span>
 |   |-- ErrorViewModel.cs
-|-- ViewModels/             <span class="c"># Modelos de vista (módulo Autores)</span>
+|-- ViewModels/             <span class="c"># Modelos de vista</span>
 |   |-- CrearEditarAutorViewModel.cs
 |   |-- AutorIndexViewModel.cs
 |   |-- AutorDetalleViewModel.cs
 |   |-- AutorDeleteViewModel.cs
+|   |-- LoginViewModel.cs
+|   |-- RegisterViewModel.cs
 |-- Services/               <span class="c"># Capa de servicios (lógica de negocio)</span>
 |   |-- IAutorService.cs
 |   |-- AutorService.cs
 |-- Data/                   <span class="c"># Capa de acceso a datos</span>
-|   |-- ApplicationDbContext.cs
-|   |-- DbSeeder.cs
+|   |-- ApplicationDbContext.cs  <span class="c"># IdentityDbContext</span>
+|   |-- DbSeeder.cs         <span class="c"># Roles + cuentas + catálogo</span>
 |-- Migrations/             <span class="c"># Migraciones EF Core</span>
 |   |-- 20260907120907_InitialCreate.cs
+|   |-- IdentityAuth.cs         <span class="c"># Tablas de Identity</span>
 |-- Views/                  <span class="c"># Vistas Razor por controlador</span>
-|   |-- Home/  Autores/  Libros/  Prestamos/  Shared/
+|   |-- Home/  Autores/  Libros/  Prestamos/  Account/  Shared/
 |-- wwwroot/                <span class="c"># Estáticos: css/site.css, lib/, js/</span>
 |-- appsettings.json        <span class="c"># Cadena de conexión y configuración</span>
-|-- Program.cs              <span class="c"># Punto de entrada (host, DI, middleware)</span>
+|-- Program.cs              <span class="c"># Punto de entrada (host, DI, Identity, middleware)</span>
 |-- BibliotecaApp.csproj    <span class="c"># Archivo del proyecto</span></code></pre>
   </section>
 
@@ -535,11 +541,13 @@ prestamos = prestamos.Where(p =&gt; p.FechaDevolucion != null);</code></pre>
       al arrancar mediante <code class="hli">Database.MigrateAsync()</code>, así la base nueva se crea sola sin pasos manuales.
     </p>
     <h3>Datos de ejemplo (DbSeeder)</h3>
-    <p><code class="hli">DbSeeder.SeedAsync</code> es <strong>idempotente</strong>: si ya existe algún autor, no hace nada. La primera vez inserta:</p>
+    <p><code class="hli">DbSeeder.SeedAsync</code> ejecuta al arrancar:</p>
     <ul class="cap">
+      <li><strong>Roles:</strong> crea Admin, Bibliotecario y Lector si no existen.</li>
+      <li><strong>Cuentas de prueba:</strong> <code class="hli">admin@biblioteca.com</code> (Admin), <code class="hli">bibliotecario@biblioteca.com</code> (Bibliotecario), <code class="hli">lector@biblioteca.com</code> (Lector).</li>
       <li>3 autores: Gabriel García Márquez, Mario Vargas Llosa y Jorge Luis Borges.</li>
       <li>4 libros: Cien Años de Soledad, El Amor en los Tiempos del Cólera, La Ciudad y los Perros, Ficciones.</li>
-      <li>3 préstamos de ejemplo (2 sin devolver y 1 devuelto) para poder probar el filtro de Préstamos.</li>
+      <li>3 préstamos de ejemplo (2 sin devolver y 1 devuelto) vinculados a la cuenta del lector.</li>
     </ul>
 
     <div class="info">
@@ -547,6 +555,137 @@ prestamos = prestamos.Where(p =&gt; p.FechaDevolucion != null);</code></pre>
       <code class="hli">App_Data\</code> dentro del proyecto. La base heredada <code class="hli">BibliotecaDb</code>
       (de un esquema anterior) no se modifica.
     </div>
+  </section>
+
+  <!-- ================= 11. Seguridad (Identity) ================= -->
+  <section class="card" id="seguridad">
+    <h2>11 · Seguridad (ASP.NET Core Identity)</h2>
+    <p>
+      La aplicación integra <strong>ASP.NET Core Identity</strong> para autenticación y autorización basada en roles.
+      Se usan cookies de sesión para mantener al usuario conectado entre páginas.
+    </p>
+
+    <h3>11.1 · Configuración de Identity</h3>
+    <p>En <code class="hli">Program.cs</code> se registra:</p>
+    <ul class="cap">
+      <li><code class="hli">AddIdentity&lt;ApplicationUser, IdentityRole&gt;</code> con política de contraseña fuerte.</li>
+      <li><code class="hli">AddEntityFrameworkStores&lt;ApplicationDbContext&gt;</code> y <code class="hli">AddDefaultTokenProviders</code>.</li>
+      <li>Cookies: <code class="hli">LoginPath = /Account/Login</code>, <code class="hli">AccessDeniedPath = /Account/AccessDenied</code>, expiración 8 h.</li>
+    </ul>
+
+    <h3>11.2 · Roles y cuentas de prueba</h3>
+    <table>
+      <tr><th>Rol</th><th>Permisos</th><th>Cuenta</th><th>Contraseña</th></tr>
+      <tr>
+        <td><span class="badge amber">Admin</span></td>
+        <td>Acceso total: CRUD en Autores, Libros y Préstamos; vista completa de datos.</td>
+        <td>admin@biblioteca.com</td>
+        <td>Admin123!</td>
+      </tr>
+      <tr>
+        <td><span class="badge">Bibliotecario</span></td>
+        <td>Autores (lectura + creación), Libros (CRUD), Préstamos (CRUD completo incluyendo Prestar/Devolver).</td>
+        <td>bibliotecario@biblioteca.com</td>
+        <td>Bibliotecario123!</td>
+      </tr>
+      <tr>
+        <td><span class="badge green">Lector</span></td>
+        <td>Lectura de catálogos; puede ver sus propios préstamos (acción "Mis Préstamos").</td>
+        <td>lector@biblioteca.com</td>
+        <td>Lector123!</td>
+      </tr>
+    </table>
+    <div class="note">
+      <strong>Reglas de contraseña:</strong> mínimo 8 caracteres, al menos una mayúscula, un dígito y un símbolo.
+    </div>
+
+    <h3>11.3 · Protección de controladores</h3>
+    <p>Todos los controladores usan atributos de autorización:</p>
+    <table>
+      <tr><th>Controlador</th><th>Atributos aplicados</th></tr>
+      <tr>
+        <td>AutoresController</td>
+        <td><code class="hli">[Authorize]</code> a nivel de clase; <code class="hli">[Authorize(Roles="Admin,Bibliotecario")]</code> en Create/Edit/Delete.</td>
+      </tr>
+      <tr>
+        <td>LibrosController</td>
+        <td><code class="hli">[Authorize]</code> a nivel de clase; <code class="hli">[Authorize(Roles="Admin,Bibliotecario")]</code> en Create/Edit/Delete.</td>
+      </tr>
+      <tr>
+        <td>PrestamosController</td>
+        <td><code class="hli">[Authorize(Roles="Admin,Bibliotecario")]</code> en Index/Details/Create/Edit/Delete/Prestar/Devolver; <code class="hli">[Authorize]</code> en MisPrestamos.</td>
+      </tr>
+      <tr>
+        <td>AccountController</td>
+        <td><code class="hli">[AllowAnonymous]</code> en Register/Login/Logout/AccessDenied.</td>
+      </tr>
+    </table>
+
+    <h3>11.4 · Matriz de acceso</h3>
+    <table>
+      <tr><th>Acción</th><th>Anónimo</th><th>Lector</th><th>Bibliotecario</th><th>Admin</th></tr>
+      <tr><td>Home / Privacy</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Autores (lectura)</td><td>❌ → /Account/Login</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Autores (CRUD)</td><td>❌ → /Account/Login</td><td>❌ → AccessDenied</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Libros (lectura)</td><td>❌ → /Account/Login</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Libros (CRUD)</td><td>❌ → /Account/Login</td><td>❌ → AccessDenied</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Préstamos (Index/CRUD/Prestar/Devolver)</td><td>❌ → /Account/Login</td><td>❌ → AccessDenied</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Mis Préstamos</td><td>❌ → /Account/Login</td><td>✅ (solo sus préstamos)</td><td>✅</td><td>✅</td></tr>
+      <tr><td>Registrar / Login</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+    </table>
+
+    <h3>11.5 · Modelo de usuario y base de datos</h3>
+    <p>
+      <code class="hli">ApplicationUser</code> (hereda de <code class="hli">IdentityUser</code>) añade el campo
+      <code class="hli">NombreCompleto</code>. La relación entre usuarios y préstamos es <strong>opcional</strong>
+      (<code class="hli">LectorId</code> nullable) y usa <code class="hli">DeleteBehavior.Restrict</code>: borrar un usuario
+      no elimina sus préstamos.
+    </p>
+    <div class="er">
+      <div class="ent">
+        <div class="ent-head">ApplicationUser</div>
+        <ul>
+          <li><strong>Id</strong> (string, PK — Identity)</li>
+          <li><strong>NombreCompleto</strong> string</li>
+          <li><strong>Email</strong> string (usado como nombre de usuario)</li>
+          <li><strong>Lector</strong> → ICollection&lt;Prestamo&gt;</li>
+        </ul>
+      </div>
+      <div class="arrow">1 ── N</div>
+      <div class="ent">
+        <div class="ent-head">Prestamo</div>
+        <ul>
+          <li><strong>Id</strong> (PK, identity)</li>
+          <li><strong>LectorId</strong> (FK → ApplicationUser, nullable) <span class="tag">restrict</span></li>
+          <li>…</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>11.6 · Componentes de UI</h3>
+    <table>
+      <tr><th>Componente</th><th>Descripción</th></tr>
+      <tr>
+        <td><code class="hli">Views/Shared/_LoginPartial.cshtml</code></td>
+        <td>Muestra "Iniciar sesión" / "Registrarse" (anónimo) o menú desplegable con el nombre del usuario y "Cerrar sesión" (autenticado).</td>
+      </tr>
+      <tr>
+        <td><code class="hli">Views/Shared/_Layout.cshtml</code></td>
+        <td>El navbar muestra enlaces según el rol: Lector ve "Mis Préstamos" en vez de "Préstamos".</td>
+      </tr>
+      <tr>
+        <td><code class="hli">Views/Account/Login.cshtml</code></td>
+        <td>Formulario de inicio de sesión con "Recordarme" y redirección segura con <code class="hli">returnUrl</code>.</td>
+      </tr>
+      <tr>
+        <td><code class="hli">Views/Account/Register.cshtml</code></td>
+        <td>Formulario de registro; asigna el rol Lector por defecto al nuevo usuario.</td>
+      </tr>
+      <tr>
+        <td><code class="hli">Views/Account/AccessDenied.cshtml</code></td>
+        <td>Página de error 403 mostrada al intentar acceder a un recurso sin el rol adecuado.</td>
+      </tr>
+    </table>
   </section>
 
 </main>

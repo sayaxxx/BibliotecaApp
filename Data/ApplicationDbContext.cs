@@ -1,17 +1,18 @@
 // ============================================================================
 //  ApplicationDbContext : contexto de Entity Framework Core
 // ----------------------------------------------------------------------------
-//  Puente entre la aplicación y la base de datos SQL Server. Declara los
-//  conjuntos de entidades (DbSet) y configura las relaciones y el borrado
-//  en cascada entre las tablas. La cadena de conexión se lee de
-//  appsettings.json ("DefaultConnection") en Program.cs.
+//  Hereda de IdentityDbContext&lt;ApplicationUser&gt; para que EF cree, además de
+//  las tablas de negocio (Autores, Libros, Prestamos), las tablas de Identity
+//  (AspNetUsers, AspNetRoles, AspNetUserRoles, AspNetRoleClaims, etc.).
+//  Configura las relaciones y el borrado en cascada de la base de datos.
 // ============================================================================
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using BibliotecaApp.Models;
 
 namespace BibliotecaApp.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -32,6 +33,7 @@ namespace BibliotecaApp.Data
         /// </summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // Configuración interna de Identity (tablas AspNet*). Siempre primero.
             base.OnModelCreating(modelBuilder);
 
             // Relación Libro -> Autor (N:1). Al borrar un autor se borran
@@ -49,6 +51,14 @@ namespace BibliotecaApp.Data
                 .WithMany(l => l.Prestamos)
                 .HasForeignKey(p => p.LibroId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Relación Prestamo -> ApplicationUser (N:1) opcional.
+            // Restrict: eliminar un usuario NO borra su historial de préstamos.
+            modelBuilder.Entity<Prestamo>()
+                .HasOne(p => p.Lector)
+                .WithMany()
+                .HasForeignKey(p => p.LectorId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

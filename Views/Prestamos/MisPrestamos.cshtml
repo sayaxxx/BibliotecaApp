@@ -1,0 +1,75 @@
+@* ============================================================================
+   Vista: Prestamos / MisPrestamos
+   Consulta exclusiva de los préstamos del usuario autenticado (Lector).
+   Filtrada por LectorId == UserId del usuario actual.
+   ============================================================================ *@
+@model IEnumerable<Prestamo>
+@{
+    ViewData["Title"] = "Mis Préstamos";
+}
+
+<div class="page-header">
+    <div>
+        <h1><span class="header-icon">📖</span>Mis Préstamos</h1>
+        <p class="page-subtitle">Consulta tus préstamos y devoluciones.</p>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="panel empty-state">
+        <div class="empty-icon">📖</div>
+        <h3 class="h5 fw-600">No tienes préstamos registrados</h3>
+        <p>Los préstamos vinculados a tu cuenta aparecerán aquí.</p>
+    </div>
+}
+else
+{
+    <div class="panel">
+        <div class="table-responsive">
+            <table class="table table-modern table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Libro</th>
+                        <th>Fecha de Préstamo</th>
+                        <th>Fecha de Devolución</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ var i = 1; }
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-muted">@i</td>
+                            <td class="fw-semibold">@(item.Libro?.Titulo ?? "Sin libro")</td>
+                            <td>@item.FechaPrestamo.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (item.FechaDevolucion.HasValue)
+                                {
+                                    @item.FechaDevolucion.Value.ToString("dd/MM/yyyy")
+                                }
+                            </td>
+                            <td>
+                                @if (item.FechaDevolucion.HasValue)
+                                {
+                                    <span class="badge badge-soft-success">Devuelto</span>
+                                }
+                                else
+                                {
+                                    <span class="badge badge-soft-danger">Pendiente</span>
+                                }
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<div class="mt-4">
+    <a asp-controller="Home" asp-action="Index" class="btn btn-link">&larr; Volver al inicio</a>
+</div>

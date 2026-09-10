@@ -1,0 +1,65 @@
+@* ============================================================================
+   Vista: Account / Login
+   Formulario de inicio de sesión (email + contraseña) con soporte de
+   returnUrl para volver a la página protegida que intentaba abrir el usuario.
+   ============================================================================ *@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<div class="az-center-page">
+    <div class="auth-card">
+        <div class="auth-head">
+            <span class="auth-icon">🔐</span>
+            <h1 class="h4 fw-700 mt-3 mb-0 text-white">Iniciar Sesión</h1>
+        </div>
+        <div class="auth-body">
+            <p class="text-muted text-center mb-4">Accede a BibliotecaApp con tu cuenta.</p>
+
+            <form asp-action="Login" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="ReturnUrl" value="@returnUrl" />
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" placeholder="tu@correo.com" autocomplete="username" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" placeholder="••••••••" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="RememberMe" class="form-check-input" />
+                    <label asp-for="RememberMe" class="form-check-label"></label>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Entrar</button>
+            </form>
+
+            <hr class="my-4" />
+            <p class="text-center mb-0">
+                ¿No tienes cuenta?
+                <a asp-action="Register">Regístrate aquí</a>
+            </p>
+
+            @if (!string.IsNullOrEmpty(returnUrl))
+            {
+                <p class="small text-muted text-center mt-3 mb-0">
+                    Serás redirigido a la página que intentabas abrir.
+                </p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

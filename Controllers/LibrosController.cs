@@ -7,8 +7,11 @@
 //      - Create  : alta de un libro nuevo
 //      - Edit    : modificación de un libro
 //      - Delete  : eliminación con confirmación
-//  Accede a la base de datos a través de ApplicationDbContext (Entity Framework).
+//
+//  Seguridad: Index y Details para cualquier usuario autenticado;
+//  Create/Edit/Delete solo para Admin y Bibliotecario.
 // ============================================================================
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +20,7 @@ using BibliotecaApp.Models;
 
 namespace BibliotecaApp.Controllers
 {
+    [Authorize]
     public class LibrosController : Controller
     {
         // Contexto de Entity Framework inyectado por el contenedor de DI.
@@ -75,8 +79,9 @@ namespace BibliotecaApp.Controllers
 
         /// <summary>
         /// GET: muestra el formulario vacío de alta de libro con los autores
-        /// disponibles en el desplegable "Autor".
+        /// disponibles en el desplegable "Autor". Solo Admin y Bibliotecario.
         /// </summary>
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public IActionResult Create()
         {
             ViewData["AutorId"] = new SelectList(_context.Autores, "Id", "Nombre");
@@ -89,6 +94,7 @@ namespace BibliotecaApp.Controllers
         /// <param name="libro">Entidad Libro recibida mediante model binding.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Create([Bind("Id,Titulo,ISBN,AnioPublicacion,AutorId")] Libro libro)
         {
             if (ModelState.IsValid)
@@ -102,10 +108,11 @@ namespace BibliotecaApp.Controllers
             return View(libro);
         }
 
-        /// <summary>
+/// <summary>
         /// GET: precarga el formulario de edición con los datos del libro.
+        /// Solo Admin y Bibliotecario.
         /// </summary>
-        /// <param name="id">Identificador del libro a editar.</param>
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -124,6 +131,7 @@ namespace BibliotecaApp.Controllers
         /// <param name="libro">Datos editados recibidos mediante model binding.</param>
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Titulo,ISBN,AnioPublicacion,AutorId")] Libro libro)
         {
             if (id != libro.Id) return NotFound();
@@ -149,11 +157,12 @@ namespace BibliotecaApp.Controllers
             return View(libro);
         }
 
-        /// <summary>
+/// <summary>
         /// GET: muestra la confirmación de borrado. Incluye el autor y los
         /// préstamos para advertir sobre la eliminación en cascada.
+        /// Solo Admin y Bibliotecario.
         /// </summary>
-        /// <param name="id">Identificador del libro a eliminar.</param>
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -168,13 +177,14 @@ namespace BibliotecaApp.Controllers
             return View(libro);
         }
 
-        /// <summary>
+/// <summary>
         /// POST: elimina definitivamente el libro. Si tiene préstamos asociados,
         /// el borrado en cascada configurado en el DbContext los eliminará también.
+        /// Solo Admin y Bibliotecario.
         /// </summary>
-        /// <param name="id">Identificador del libro a eliminar.</param>
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Bibliotecario")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var libro = await _context.Libros.FindAsync(id);

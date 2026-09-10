@@ -18,12 +18,20 @@
         <h1><span class="header-icon">🔄</span>Lista de Préstamos</h1>
         <p class="page-subtitle">Seguimiento de préstamos y devoluciones</p>
     </div>
-    <a asp-action="Create" class="btn btn-primary">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg me-1" viewBox="0 0 16 16">
-            <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-        </svg>
-        Nuevo Préstamo
-    </a>
+    <div class="d-flex gap-2">
+        <a asp-action="Create" class="btn btn-outline-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg me-1" viewBox="0 0 16 16">
+                <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
+            </svg>
+            Formulario completo
+        </a>
+        <a asp-action="Prestar" class="btn btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-up-right me-1" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M14 2.5a.5.5 0 0 0-.5-.5h-6a.5.5 0 0 0 0 1h4.793L2.146 13.146a.5.5 0 0 0 .708.708L13 3.707V8.5a.5.5 0 0 0 1 0v-6z"/>
+            </svg>
+            Registrar Préstamo
+        </a>
+    </div>
 </div>
 
 @* Panel de filtro por estado del préstamo (mismo patrón que el de Libros) *@
@@ -90,6 +98,10 @@ else
                             </td>
                             <td class="text-end text-nowrap">
                                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Ver detalles">Detalles</a>
+                                @if (item.FechaDevolucion == null)
+                                {
+                                    <a asp-action="Devolver" asp-route-id="@item.Id" class="btn btn-sm btn-success" title="Registrar devolución">Devolver</a>
+                                }
                                 <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="Editar">Editar</a>
                                 <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="Eliminar">Eliminar</a>
                             </td>
